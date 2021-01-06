@@ -99,7 +99,9 @@ export class Tileset extends EntityRegistry implements ITileset {
                 existingYield instanceof tileYield.constructor
             );
 
-            tileYield.add(existingYield, `tile-${tile.x()},${tile.y()}`);
+            if (existingYield instanceof Yield) {
+              tileYield.add(existingYield, `tile-${tile.x()},${tile.y()}`);
+            }
 
             return tileYield;
           }

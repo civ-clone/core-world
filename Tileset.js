@@ -4,6 +4,7 @@ exports.Tileset = void 0;
 const EntityRegistry_1 = require("@civ-clone/core-registry/EntityRegistry");
 const YieldRegistry_1 = require("@civ-clone/core-yield/YieldRegistry");
 const Tile_1 = require("./Tile");
+const Yield_1 = require("@civ-clone/core-yield/Yield");
 class Tileset extends EntityRegistry_1.EntityRegistry {
     static from(...tiles) {
         return new this(...tiles);
@@ -41,7 +42,9 @@ class Tileset extends EntityRegistry_1.EntityRegistry {
         }
         return this.entries().reduce((tilesetYields, tile) => tile.yields(player, yields, yieldRegistry).map((tileYield) => {
             const [existingYield] = tilesetYields.filter((existingYield) => existingYield instanceof tileYield.constructor);
-            tileYield.add(existingYield, `tile-${tile.x()},${tile.y()}`);
+            if (existingYield instanceof Yield_1.default) {
+                tileYield.add(existingYield, `tile-${tile.x()},${tile.y()}`);
+            }
             return tileYield;
         }), yields.map((YieldType) => new YieldType()));
     }
