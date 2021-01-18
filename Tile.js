@@ -136,13 +136,13 @@ class Tile extends DataObject_1.DataObject {
         const yieldCache = this.getYieldCache(player);
         if (yieldCache.has(type.constructor)) {
             const cachedYield = yieldCache.get(type.constructor);
-            if (cachedYield instanceof Yield_1.default) {
+            if (typeof cachedYield === 'number') {
                 type.add(cachedYield);
                 return type;
             }
         }
         __classPrivateFieldGet(this, _ruleRegistry).process(Yield_2.default, type, this, player);
-        yieldCache.set(type.constructor, type);
+        yieldCache.set(type.constructor, type.value());
         return type;
     }
     score(player, values = [[Yield_1.default, 3]], yieldEntries = [], yieldRegistry = YieldRegistry_1.instance) {

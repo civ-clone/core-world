@@ -19,7 +19,7 @@ import Yield from '@civ-clone/core-yield/Yield';
 import YieldRule, { IYieldRegistry } from './Rules/Yield';
 
 export type IYieldMap = [typeof Yield, number];
-type IYieldEntry = Map<typeof Yield, Yield>;
+type IYieldEntry = Map<typeof Yield, number>;
 type IYieldCache = Map<Player | null, IYieldEntry>;
 export type IAdjacentTiles = 'n' | 'e' | 's' | 'w';
 export type INeighbouringTiles = IAdjacentTiles | 'ne' | 'se' | 'sw' | 'nw';
@@ -219,7 +219,7 @@ export class Tile extends DataObject implements ITile {
     if (yieldCache.has(<typeof Yield>type.constructor)) {
       const cachedYield = yieldCache.get(<typeof Yield>type.constructor);
 
-      if (cachedYield instanceof Yield) {
+      if (typeof cachedYield === 'number') {
         type.add(cachedYield);
 
         return type;
@@ -233,7 +233,7 @@ export class Tile extends DataObject implements ITile {
       player
     );
 
-    yieldCache.set(<typeof Yield>type.constructor, type);
+    yieldCache.set(<typeof Yield>type.constructor, type.value());
 
     return type;
   }

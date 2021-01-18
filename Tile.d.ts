@@ -10,7 +10,7 @@ import Tileset from './Tileset';
 import World from './World';
 import Yield from '@civ-clone/core-yield/Yield';
 export declare type IYieldMap = [typeof Yield, number];
-declare type IYieldEntry = Map<typeof Yield, Yield>;
+declare type IYieldEntry = Map<typeof Yield, number>;
 export declare type IAdjacentTiles = 'n' | 'e' | 's' | 'w';
 export declare type INeighbouringTiles =
   | IAdjacentTiles
