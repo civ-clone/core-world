@@ -149,7 +149,7 @@ class Tile extends DataObject_1.DataObject {
         const yields = this.yields(player, yieldEntries, yieldRegistry);
         return (yields
             .map((tileYield) => {
-            const [value] = values.filter(([YieldType]) => tileYield instanceof YieldType), weight = value[1] || 1;
+            const [value] = values.filter(([YieldType]) => tileYield instanceof YieldType), weight = value ? value[1] || 1 : 0;
             return tileYield.value() * weight;
         })
             .reduce((total, value) => total + value, 0) *

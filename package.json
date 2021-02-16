@@ -1,6 +1,6 @@
 {
   "name": "@civ-clone/core-world",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "repository": "git@github.com:civ-clone/core-world.git",
   "keywords": [
     "typescript",

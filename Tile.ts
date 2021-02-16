@@ -253,7 +253,7 @@ export class Tile extends DataObject implements ITile {
               ([YieldType]: IYieldMap): boolean =>
                 tileYield instanceof YieldType
             ),
-            weight: number = value[1] || 1;
+            weight: number = value ? value[1] || 1 : 0;
 
           return tileYield.value() * weight;
         })
