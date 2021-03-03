@@ -6,7 +6,7 @@ import World from '../../World';
 export declare class FillGenerator extends Generator {
   #private;
   constructor(height: number, width: number, TerrainType: typeof Terrain);
-  generate(): Terrain[];
+  generate(): Promise<Terrain[]>;
 }
 export declare const generateGenerator: (
   height?: number,
@@ -16,5 +16,7 @@ export declare const generateGenerator: (
 export declare const generateWorld: (
   generator?: Generator,
   ruleRegistry?: RuleRegistry
-) => World;
-export declare const generateTile: (ruleRegistry?: RuleRegistry) => Tile;
+) => Promise<World>;
+export declare const generateTile: (
+  ruleRegistry?: RuleRegistry
+) => Promise<Tile>;

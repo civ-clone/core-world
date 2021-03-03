@@ -37,19 +37,21 @@ export class World extends DataObject implements IWorld {
   }
 
   build(ruleRegistry: RuleRegistry = ruleRegistryInstance): void {
-    this.#generator.generate().forEach((terrain: Terrain, i: number): void => {
-      const tile = new Tile(
-        i % this.#width,
-        Math.floor(i / this.#width),
-        terrain,
-        this,
-        ruleRegistry
-      );
+    this.#generator.generate().then((tiles: Terrain[]) => {
+      tiles.forEach((terrain: Terrain, i: number): void => {
+        const tile = new Tile(
+          i % this.#width,
+          Math.floor(i / this.#width),
+          terrain,
+          this,
+          ruleRegistry
+        );
 
-      this.#tiles.register(tile);
+        this.#tiles.register(tile);
+      });
+
+      (ruleRegistry as IBuiltRegistry).process(Built, this);
     });
-
-    (ruleRegistry as IBuiltRegistry).process(Built, this);
   }
 
   entries(): Tile[] {

@@ -7,6 +7,8 @@ import { Land } from '@civ-clone/core-terrain/Types';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tile from '../../Tile';
 import World from '../../World';
+import Built from '../../Rules/Built';
+import Effect from '@civ-clone/core-rule/Effect';
 
 export class FillGenerator extends Generator {
   #TerrainType: typeof Terrain;
@@ -17,10 +19,14 @@ export class FillGenerator extends Generator {
     this.#TerrainType = TerrainType;
   }
 
-  generate(): Terrain[] {
-    return new Array(this.height() * this.width())
-      .fill(0)
-      .map((): Terrain => new this.#TerrainType());
+  generate(): Promise<Terrain[]> {
+    return new Promise<Terrain[]>((resolve): void =>
+      resolve(
+        new Array(this.height() * this.width())
+          .fill(0)
+          .map((): Terrain => new this.#TerrainType())
+      )
+    );
   }
 }
 
@@ -37,17 +43,31 @@ export const generateGenerator: (
 export const generateWorld: (
   generator?: Generator,
   ruleRegistry?: RuleRegistry
-) => World = (
+) => Promise<World> = (
   generator: Generator = generateGenerator(10, 10, Land),
   ruleRegistry: RuleRegistry = ruleRegistryInstance
 ) => {
-  const world = new World(generator);
+  return new Promise<World>((resolve) => {
+    const world = new World(generator),
+      onBuilt = new Built(
+        new Effect((world) => {
+          ruleRegistry.unregister(onBuilt);
 
-  world.build(ruleRegistry);
+          resolve(world);
+        })
+      );
 
-  return world;
+    ruleRegistry.register(onBuilt);
+
+    world.build(ruleRegistry);
+  });
 };
 
-export const generateTile: (ruleRegistry?: RuleRegistry) => Tile = (
+export const generateTile: (ruleRegistry?: RuleRegistry) => Promise<Tile> = (
   ruleRegistry: RuleRegistry = ruleRegistryInstance
-): Tile => generateWorld(generateGenerator(1, 1), ruleRegistry).get(0, 0);
+): Promise<Tile> =>
+  new Promise((resolve) =>
+    generateWorld(generateGenerator(1, 1), ruleRegistry).then((world) =>
+      resolve(world.get(0, 0))
+    )
+  );

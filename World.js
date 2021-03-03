@@ -33,11 +33,13 @@ class World extends DataObject_1.DataObject {
         this.addKey('height', 'tiles', 'width');
     }
     build(ruleRegistry = RuleRegistry_1.instance) {
-        __classPrivateFieldGet(this, _generator).generate().forEach((terrain, i) => {
-            const tile = new Tile_1.default(i % __classPrivateFieldGet(this, _width), Math.floor(i / __classPrivateFieldGet(this, _width)), terrain, this, ruleRegistry);
-            __classPrivateFieldGet(this, _tiles).register(tile);
+        __classPrivateFieldGet(this, _generator).generate().then((tiles) => {
+            tiles.forEach((terrain, i) => {
+                const tile = new Tile_1.default(i % __classPrivateFieldGet(this, _width), Math.floor(i / __classPrivateFieldGet(this, _width)), terrain, this, ruleRegistry);
+                __classPrivateFieldGet(this, _tiles).register(tile);
+            });
+            ruleRegistry.process(Built_1.Built, this);
         });
-        ruleRegistry.process(Built_1.Built, this);
     }
     entries() {
         return __classPrivateFieldGet(this, _tiles).entries();

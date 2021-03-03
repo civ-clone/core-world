@@ -17,9 +17,9 @@
     "@civ-clone/core-yield" "^0.1.0"
 
 "@civ-clone/core-data-object@^0.1.0":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@civ-clone/core-data-object/-/core-data-object-0.1.3.tgz#a710426b4d693b634ee0f4d38baa3f53a48b27ca"
-  integrity sha512-ZDKHA0vjKadAOF8YYyIvIqHOCmSSrulTyPHuWVzM8+WCMSfJYJtMFWPDlWhcamGCj0Wh0UY0wJXMR/WDlnKIKQ==
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@civ-clone/core-data-object/-/core-data-object-0.1.4.tgz#29c51d64f5e167f8a617928b43fa5702670a12fe"
+  integrity sha512-Qe39BKWzazXbeEZNec66+i1/jdnvEA7bzKVeVo0g2IPJTAeguKJE6dU92yiWnNDrpNI0aDpT0vJOC07v8jxrSA==
   dependencies:
     "@civ-clone/core-registry" "^0.1.0"
     ulid "^2.3.0"
@@ -56,9 +56,9 @@
     "@civ-clone/core-rule" "^0.1.0"
 
 "@civ-clone/core-world-generator@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@civ-clone/core-world-generator/-/core-world-generator-0.1.0.tgz#63d800f5b8396e6255b516ab0f365f2a388baef0"
-  integrity sha512-bz8G8n1XMp6yOyfRkTf5BN6/VgXdZZKL0V40VcmKJXDuzrMbbJGK3enQxOnoq3156DYv2ya3RC9ITGMAdqpnOg==
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@civ-clone/core-world-generator/-/core-world-generator-0.1.1.tgz#89e7954ac2dfe9c71f3f4feff35ce1232ba36fc4"
+  integrity sha512-1n4L9CwcNliLpK8mP+O94d5ZdwfjOcgEaeJ/KxPqaX/xEY+6DhnjtI7Abaezo448uaSwf65fnNNOXwutg8Gn7A==
   dependencies:
     "@civ-clone/core-registry" "^0.1.0"
     "@civ-clone/core-rule" "^0.1.0"
@@ -229,15 +229,15 @@ chai-spies@^1.0.0:
   integrity sha512-elF2ZUczBsFoP07qCfMO/zeggs8pqCf3fZGyK5+2X4AndS8jycZYID91ztD9oQ7d/0tnS963dPkd0frQEThDsg==
 
 chai@^4.2.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/chai/-/chai-4.3.0.tgz#5523a5faf7f819c8a92480d70a8cccbadacfc25f"
-  integrity sha512-/BFd2J30EcOwmdOgXvVsmM48l0Br0nmZPlO0uOW4XKh6kpsUumRXBgPV+IlaqFaqr9cYbeoZAM1Npx0i4A+aiA==
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/chai/-/chai-4.3.3.tgz#f2b2ad9736999d07a7ff95cf1e7086c43a76f72d"
+  integrity sha512-MPSLOZwxxnA0DhLE84klnGPojWFK5KuhP7/j5dTsxpr2S3XlkqJP5WbyYl1gCTWvG2Z5N+HD4F472WsbEZL6Pw==
   dependencies:
     assertion-error "^1.1.0"
     check-error "^1.0.2"
     deep-eql "^3.0.1"
     get-func-name "^2.0.0"
-    pathval "^1.1.0"
+    pathval "^1.1.1"
     type-detect "^4.0.5"
 
 chalk@^4.0.0:
@@ -679,7 +679,7 @@ path-key@^3.1.0:
   resolved "https://registry.yarnpkg.com/path-key/-/path-key-3.1.1.tgz#581f6ade658cbba65a0d3380de7753295054f375"
   integrity sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==
 
-pathval@^1.1.0:
+pathval@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/pathval/-/pathval-1.1.1.tgz#8534e77a77ce7ac5a2512ea21e0fdb8fcf6c3d8d"
   integrity sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==
@@ -786,9 +786,9 @@ source-map@^0.7.3:
     strip-ansi "^4.0.0"
 
 string-width@^4.1.0, string-width@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.0.tgz#952182c46cc7b2c313d1596e623992bd163b72b5"
-  integrity sha512-zUz5JD+tgqtuDjMhwIg5uFVV3dtqZ9yQJlZVfq4I01/K5Paj5UHj7VyrQOJvzawSVlKpObApbfD0Ed6yJc+1eg==
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.2.tgz#dafd4f9559a7585cfba529c6a0a4f73488ebd4c5"
+  integrity sha512-XBJbT3N4JhVumXE0eoLU9DCjcaF92KLNqTmFCnG1pf8duUxFGwtP6AD6nkjw9a3IdiRtL3E2w3JDiE/xi3vOeA==
   dependencies:
     emoji-regex "^8.0.0"
     is-fullwidth-code-point "^3.0.0"

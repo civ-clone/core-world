@@ -27,135 +27,153 @@ describe('Tileset', (): void => {
   );
   yieldRegistry.register(TestYield);
 
-  it('should include the expected `Tile`s', (): void => {
-    const world = generateWorld(),
-      tile = world.get(0, 0),
-      anotherTile = world.get(1, 1),
-      wrappedTile = world.get(8, 8),
-      tileSurroundingArea2 = tile.getSurroundingArea(),
-      tileSurroundingArea1 = tile.getSurroundingArea(1);
+  it('should include the expected `Tile`s', (done): void => {
+    generateWorld().then((world) => {
+      const tile = world.get(0, 0),
+        anotherTile = world.get(1, 1),
+        wrappedTile = world.get(8, 8),
+        tileSurroundingArea2 = tile.getSurroundingArea(),
+        tileSurroundingArea1 = tile.getSurroundingArea(1);
 
-    expect(tileSurroundingArea2.includes(anotherTile)).to.true;
-    expect(tileSurroundingArea2.includes(wrappedTile)).to.true;
-    expect(tileSurroundingArea2.includes(world.get(5, 5))).to.false;
-    expect(tileSurroundingArea1.includes(world.get(2, 2))).to.false;
+      expect(tileSurroundingArea2.includes(anotherTile)).to.true;
+      expect(tileSurroundingArea2.includes(wrappedTile)).to.true;
+      expect(tileSurroundingArea2.includes(world.get(5, 5))).to.false;
+      expect(tileSurroundingArea1.includes(world.get(2, 2))).to.false;
+
+      done();
+    });
   });
 
-  it('should be the expected length', (): void => {
-    const world = generateWorld(),
-      tile = world.get(0, 0),
-      tileSurroundingArea2 = tile.getSurroundingArea(),
-      tileSurroundingArea0 = tile.getSurroundingArea(0),
-      tileSurroundingArea4 = tile.getSurroundingArea(4);
+  it('should be the expected length', (done): void => {
+    generateWorld().then((world) => {
+      const tile = world.get(0, 0),
+        tileSurroundingArea2 = tile.getSurroundingArea(),
+        tileSurroundingArea0 = tile.getSurroundingArea(0),
+        tileSurroundingArea4 = tile.getSurroundingArea(4);
 
-    expect(tileSurroundingArea0.length).to.equal(1);
-    expect(tileSurroundingArea2.length).to.equal(25);
-    expect(tileSurroundingArea4.length).to.equal(81);
+      expect(tileSurroundingArea0.length).to.equal(1);
+      expect(tileSurroundingArea2.length).to.equal(25);
+      expect(tileSurroundingArea4.length).to.equal(81);
+
+      done();
+    });
   });
 
-  it('should be possible to mutate', (): void => {
-    const world = generateWorld(),
-      tile = world.get(0, 0),
-      anotherTile = world.get(1, 1),
-      tileset = Tileset.from(tile);
+  it('should be possible to mutate', (done): void => {
+    generateWorld().then((world) => {
+      const tile = world.get(0, 0),
+        anotherTile = world.get(1, 1),
+        tileset = Tileset.from(tile);
 
-    expect(tileset.length).to.equal(1);
-    expect(tileset.entries()).to.include(tile);
+      expect(tileset.length).to.equal(1);
+      expect(tileset.entries()).to.include(tile);
 
-    tileset.push(tile);
+      tileset.push(tile);
 
-    expect(tileset.length).to.equal(1);
-    expect(tileset.entries()).to.include(tile);
+      expect(tileset.length).to.equal(1);
+      expect(tileset.entries()).to.include(tile);
 
-    tileset.push(anotherTile);
+      tileset.push(anotherTile);
 
-    expect(tileset.length).to.equal(2);
-    expect(tileset.entries()).to.include(tile);
-    expect(tileset.entries()).to.include(anotherTile);
+      expect(tileset.length).to.equal(2);
+      expect(tileset.entries()).to.include(tile);
+      expect(tileset.entries()).to.include(anotherTile);
 
-    tileset.shift();
+      tileset.shift();
 
-    expect(tileset.length).to.equal(1);
-    expect(tileset.entries()).not.include(tile);
-    expect(tileset.entries()).to.include(anotherTile);
+      expect(tileset.length).to.equal(1);
+      expect(tileset.entries()).not.include(tile);
+      expect(tileset.entries()).to.include(anotherTile);
+
+      done();
+    });
   });
 
-  it('should correctly return a score for all the contained tiles', (): void => {
-    const world = generateWorld(generateGenerator(), ruleRegistry),
-      tile = world.get(0, 0),
-      anotherTile = world.get(1, 1),
-      tileset = Tileset.from(tile);
+  it('should correctly return a score for all the contained tiles', (done): void => {
+    generateWorld(generateGenerator(), ruleRegistry).then((world) => {
+      const tile = world.get(0, 0),
+        anotherTile = world.get(1, 1),
+        tileset = Tileset.from(tile);
 
-    expect(
-      tileset.score(
-        new Player(ruleRegistry),
-        [[TestYield, 2]],
-        [],
-        yieldRegistry
-      )
-    ).to.equal(4);
+      expect(
+        tileset.score(
+          new Player(ruleRegistry),
+          [[TestYield, 2]],
+          [],
+          yieldRegistry
+        )
+      ).to.equal(4);
 
-    tileset.push(anotherTile);
+      tileset.push(anotherTile);
 
-    expect(
-      tileset.score(
-        new Player(ruleRegistry),
-        [[TestYield, 2]],
-        [],
-        yieldRegistry
-      )
-    ).to.equal(8);
+      expect(
+        tileset.score(
+          new Player(ruleRegistry),
+          [[TestYield, 2]],
+          [],
+          yieldRegistry
+        )
+      ).to.equal(8);
+
+      done();
+    });
   });
 
-  it('should correctly return a yields for all the contained tiles', (): void => {
-    const world = generateWorld(generateGenerator(), ruleRegistry),
-      tile = world.get(0, 0),
-      anotherTile = world.get(1, 1),
-      tileset = Tileset.from(tile),
-      [tilesetYield] = tileset.yields(new Player(ruleRegistry), [TestYield]);
+  it('should correctly return a yields for all the contained tiles', (done): void => {
+    generateWorld(generateGenerator(), ruleRegistry).then((world) => {
+      const tile = world.get(0, 0),
+        anotherTile = world.get(1, 1),
+        tileset = Tileset.from(tile),
+        [tilesetYield] = tileset.yields(new Player(ruleRegistry), [TestYield]);
 
-    expect(tilesetYield.value()).to.equal(2);
+      expect(tilesetYield.value()).to.equal(2);
 
-    tileset.push(anotherTile);
+      tileset.push(anotherTile);
 
-    const [updatedYield] = tileset.yields(new Player(ruleRegistry), [
-      TestYield,
-    ]);
+      const [updatedYield] = tileset.yields(new Player(ruleRegistry), [
+        TestYield,
+      ]);
 
-    expect(updatedYield.value()).to.equal(4);
+      expect(updatedYield.value()).to.equal(4);
 
-    const [unregisteredYield] = tileset.yields(new Player(ruleRegistry), [
-      AnotherYield,
-    ]);
+      const [unregisteredYield] = tileset.yields(new Player(ruleRegistry), [
+        AnotherYield,
+      ]);
 
-    expect(unregisteredYield.value()).to.equal(2);
+      expect(unregisteredYield.value()).to.equal(2);
+
+      done();
+    });
   });
 
-  it('should use the yields from the `YieldRegistry` if none are specified', (): void => {
-    const world = generateWorld(generateGenerator(), ruleRegistry),
-      tile = world.get(0, 0),
-      anotherTile = world.get(1, 1),
-      tileset = Tileset.from(tile),
-      [tilesetYield] = tileset.yields(
-        new Player(ruleRegistry),
-        [],
-        yieldRegistry
-      );
+  it('should use the yields from the `YieldRegistry` if none are specified', (done): void => {
+    generateWorld(generateGenerator(), ruleRegistry).then((world) => {
+      const tile = world.get(0, 0),
+        anotherTile = world.get(1, 1),
+        tileset = Tileset.from(tile),
+        [tilesetYield] = tileset.yields(
+          new Player(ruleRegistry),
+          [],
+          yieldRegistry
+        );
 
-    expect(tilesetYield.value()).to.equal(2);
+      expect(tilesetYield.value()).to.equal(2);
 
-    tileset.push(anotherTile);
+      tileset.push(anotherTile);
 
-    const [updatedYield] = tileset.yields(new Player(ruleRegistry), [
-      TestYield,
-    ]);
+      const [updatedYield] = tileset.yields(new Player(ruleRegistry), [
+        TestYield,
+      ]);
 
-    expect(updatedYield.value()).to.equal(4);
+      expect(updatedYield.value()).to.equal(4);
 
-    const [unregisteredYield] = tileset.yields(new Player(ruleRegistry), [
-      AnotherYield,
-    ]);
+      const [unregisteredYield] = tileset.yields(new Player(ruleRegistry), [
+        AnotherYield,
+      ]);
 
-    expect(unregisteredYield.value()).to.equal(2);
+      expect(unregisteredYield.value()).to.equal(2);
+
+      done();
+    });
   });
 });
