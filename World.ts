@@ -14,7 +14,7 @@ import Tile from './Tile';
 import { IRegistryFilter } from '@civ-clone/core-registry/Registry';
 
 export interface IWorld extends IDataObject {
-  build(ruleRegistry: RuleRegistry): void;
+  build(ruleRegistry: RuleRegistry): Promise<World>;
   get(x: number, y: number): Tile;
   height(): number;
   width(): number;
@@ -36,21 +36,25 @@ export class World extends DataObject implements IWorld {
     this.addKey('height', 'tiles', 'width');
   }
 
-  build(ruleRegistry: RuleRegistry = ruleRegistryInstance): void {
-    this.#generator.generate().then((tiles: Terrain[]) => {
-      tiles.forEach((terrain: Terrain, i: number): void => {
-        const tile = new Tile(
-          i % this.#width,
-          Math.floor(i / this.#width),
-          terrain,
-          this,
-          ruleRegistry
-        );
+  build(ruleRegistry: RuleRegistry = ruleRegistryInstance): Promise<World> {
+    return new Promise<World>((resolve) => {
+      this.#generator.generate().then((tiles: Terrain[]) => {
+        tiles.forEach((terrain: Terrain, i: number): void => {
+          const tile = new Tile(
+            i % this.#width,
+            Math.floor(i / this.#width),
+            terrain,
+            this,
+            ruleRegistry
+          );
 
-        this.#tiles.register(tile);
+          this.#tiles.register(tile);
+        });
+
+        (ruleRegistry as IBuiltRegistry).process(Built, this);
+
+        resolve(this);
       });
-
-      (ruleRegistry as IBuiltRegistry).process(Built, this);
     });
   }
 

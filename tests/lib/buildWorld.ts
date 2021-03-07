@@ -7,8 +7,6 @@ import { Land } from '@civ-clone/core-terrain/Types';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tile from '../../Tile';
 import World from '../../World';
-import Built from '../../Rules/Built';
-import Effect from '@civ-clone/core-rule/Effect';
 
 export class FillGenerator extends Generator {
   #TerrainType: typeof Terrain;
@@ -47,20 +45,9 @@ export const generateWorld: (
   generator: Generator = generateGenerator(10, 10, Land),
   ruleRegistry: RuleRegistry = ruleRegistryInstance
 ) => {
-  return new Promise<World>((resolve) => {
-    const world = new World(generator),
-      onBuilt = new Built(
-        new Effect((world) => {
-          ruleRegistry.unregister(onBuilt);
+  const world = new World(generator);
 
-          resolve(world);
-        })
-      );
-
-    ruleRegistry.register(onBuilt);
-
-    world.build(ruleRegistry);
-  });
+  return world.build(ruleRegistry);
 };
 
 export const generateTile: (ruleRegistry?: RuleRegistry) => Promise<Tile> = (

@@ -56,9 +56,9 @@
     "@civ-clone/core-rule" "^0.1.0"
 
 "@civ-clone/core-world-generator@^0.1.0":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@civ-clone/core-world-generator/-/core-world-generator-0.1.1.tgz#89e7954ac2dfe9c71f3f4feff35ce1232ba36fc4"
-  integrity sha512-1n4L9CwcNliLpK8mP+O94d5ZdwfjOcgEaeJ/KxPqaX/xEY+6DhnjtI7Abaezo448uaSwf65fnNNOXwutg8Gn7A==
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@civ-clone/core-world-generator/-/core-world-generator-0.1.2.tgz#e718aafcfca780ca91769a279cd1e4c1f4356b16"
+  integrity sha512-BINMMUpuJZNogwHFcJ6osMe+azJ6uFiGmcTK3ZdfB1QVz95fkSDl6Bf3/PiGpbRxB+MuIbE+l4WytTtrdC+enA==
   dependencies:
     "@civ-clone/core-registry" "^0.1.0"
     "@civ-clone/core-rule" "^0.1.0"

@@ -7,7 +7,7 @@ import Generator from '@civ-clone/core-world-generator/Generator';
 import Tile from './Tile';
 import { IRegistryFilter } from '@civ-clone/core-registry/Registry';
 export interface IWorld extends IDataObject {
-  build(ruleRegistry: RuleRegistry): void;
+  build(ruleRegistry: RuleRegistry): Promise<World>;
   get(x: number, y: number): Tile;
   height(): number;
   width(): number;
@@ -15,7 +15,7 @@ export interface IWorld extends IDataObject {
 export declare class World extends DataObject implements IWorld {
   #private;
   constructor(generator: Generator);
-  build(ruleRegistry?: RuleRegistry): void;
+  build(ruleRegistry?: RuleRegistry): Promise<World>;
   entries(): Tile[];
   filter(iterator: IRegistryFilter<Tile>): Tile[];
   forEach(iterator: (item: Tile, i: number) => void): void;

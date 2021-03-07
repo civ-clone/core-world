@@ -20,8 +20,6 @@ const Generator_1 = require("@civ-clone/core-world-generator/Generator");
 const Types_1 = require("@civ-clone/core-terrain/Types");
 const Terrain_1 = require("@civ-clone/core-terrain/Terrain");
 const World_1 = require("../../World");
-const Built_1 = require("../../Rules/Built");
-const Effect_1 = require("@civ-clone/core-rule/Effect");
 class FillGenerator extends Generator_1.default {
     constructor(height, width, TerrainType) {
         super(height, width);
@@ -39,14 +37,8 @@ _TerrainType = new WeakMap();
 const generateGenerator = (height = 10, width = 10, TerrainType = Terrain_1.default) => new FillGenerator(height, width, TerrainType);
 exports.generateGenerator = generateGenerator;
 const generateWorld = (generator = exports.generateGenerator(10, 10, Types_1.Land), ruleRegistry = RuleRegistry_1.instance) => {
-    return new Promise((resolve) => {
-        const world = new World_1.default(generator), onBuilt = new Built_1.default(new Effect_1.default((world) => {
-            ruleRegistry.unregister(onBuilt);
-            resolve(world);
-        }));
-        ruleRegistry.register(onBuilt);
-        world.build(ruleRegistry);
-    });
+    const world = new World_1.default(generator);
+    return world.build(ruleRegistry);
 };
 exports.generateWorld = generateWorld;
 const generateTile = (ruleRegistry = RuleRegistry_1.instance) => new Promise((resolve) => exports.generateWorld(exports.generateGenerator(1, 1), ruleRegistry).then((world) => resolve(world.get(0, 0))));
