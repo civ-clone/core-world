@@ -3,14 +3,11 @@ import {
   DataObject,
 } from '@civ-clone/core-data-object/DataObject';
 import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
-import { YieldRegistry } from '@civ-clone/core-yield/YieldRegistry';
 import Player from '@civ-clone/core-player/Player';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tileset from './Tileset';
 import World from './World';
 import Yield from '@civ-clone/core-yield/Yield';
-export declare type IYieldMap = [typeof Yield, number];
-declare type IYieldEntry = Map<typeof Yield, number>;
 export declare type IAdjacentTiles = 'n' | 'e' | 's' | 'w';
 export declare type INeighbouringTiles =
   | IAdjacentTiles
@@ -18,9 +15,9 @@ export declare type INeighbouringTiles =
   | 'se'
   | 'sw'
   | 'nw';
+export declare type IYieldMap = [typeof Yield, number];
 export interface ITile extends IDataObject {
   clearYieldCache(player: Player | null): void;
-  getYieldCache(player: Player | null): IYieldEntry;
   getAdjacent(): Tile[];
   getAdjacentDirections(): IAdjacentTiles[];
   getNeighbour(direction: INeighbouringTiles): Tile;
@@ -33,17 +30,12 @@ export interface ITile extends IDataObject {
   isNeighbourOf(otherTile: Tile): boolean;
   isWater(): boolean;
   map(): World;
-  resource(type: Yield, player: Player | null): Yield;
   score(player: Player | null, values: IYieldMap[]): number;
   terrain(): Terrain;
   setTerrain(terrain: Terrain): void;
   x(): number;
   y(): number;
-  yields(
-    player: Player | null,
-    yields: typeof Yield[],
-    yieldRegistry: YieldRegistry
-  ): Yield[];
+  yields(player: Player | null): Yield[];
 }
 export declare class Tile extends DataObject implements ITile {
   #private;
@@ -55,7 +47,6 @@ export declare class Tile extends DataObject implements ITile {
     ruleRegistry?: RuleRegistry
   );
   clearYieldCache(player?: Player | null): void;
-  getYieldCache(player?: Player | null): IYieldEntry;
   getAdjacent(): Tile[];
   getAdjacentDirections(): IAdjacentTiles[];
   getNeighbour(direction: INeighbouringTiles): Tile;
@@ -68,21 +59,11 @@ export declare class Tile extends DataObject implements ITile {
   isNeighbourOf(otherTile: Tile): boolean;
   isWater(): boolean;
   map(): World;
-  resource(type: Yield, player: Player): Yield;
-  score(
-    player: Player,
-    values?: IYieldMap[],
-    yieldEntries?: typeof Yield[],
-    yieldRegistry?: YieldRegistry
-  ): number;
+  score(player?: Player | null, values?: IYieldMap[]): number;
   terrain(): Terrain;
   setTerrain(terrain: Terrain): void;
   x(): number;
   y(): number;
-  yields(
-    player: Player,
-    yields?: typeof Yield[],
-    yieldRegistry?: YieldRegistry
-  ): Yield[];
+  yields(player?: Player | null): Yield[];
 }
 export default Tile;

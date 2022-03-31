@@ -7,26 +7,21 @@ import {
   RuleRegistry,
   instance as ruleRegistryInstance,
 } from '@civ-clone/core-rule/RuleRegistry';
-import {
-  YieldRegistry,
-  instance as yieldRegistryInstance,
-} from '@civ-clone/core-yield/YieldRegistry';
+import { Yield as YieldRule, IYieldRegistry } from './Rules/Yield';
+import { YieldModifier, IYieldModifierRegistry } from './Rules/YieldModifier';
 import Player from '@civ-clone/core-player/Player';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tileset from './Tileset';
 import World from './World';
 import Yield from '@civ-clone/core-yield/Yield';
-import YieldRule, { IYieldRegistry } from './Rules/Yield';
 
-export type IYieldMap = [typeof Yield, number];
-type IYieldEntry = Map<typeof Yield, number>;
-type IYieldCache = Map<Player | null, IYieldEntry>;
 export type IAdjacentTiles = 'n' | 'e' | 's' | 'w';
 export type INeighbouringTiles = IAdjacentTiles | 'ne' | 'se' | 'sw' | 'nw';
+type IYieldCache = Map<Player | null, Yield[]>;
+export type IYieldMap = [typeof Yield, number];
 
 export interface ITile extends IDataObject {
   clearYieldCache(player: Player | null): void;
-  getYieldCache(player: Player | null): IYieldEntry;
   getAdjacent(): Tile[];
   getAdjacentDirections(): IAdjacentTiles[];
   getNeighbour(direction: INeighbouringTiles): Tile;
@@ -39,17 +34,12 @@ export interface ITile extends IDataObject {
   isNeighbourOf(otherTile: Tile): boolean;
   isWater(): boolean;
   map(): World;
-  resource(type: Yield, player: Player | null): Yield;
   score(player: Player | null, values: IYieldMap[]): number;
   terrain(): Terrain;
   setTerrain(terrain: Terrain): void;
   x(): number;
   y(): number;
-  yields(
-    player: Player | null,
-    yields: typeof Yield[],
-    yieldRegistry: YieldRegistry
-  ): Yield[];
+  yields(player: Player | null): Yield[];
 }
 
 export class Tile extends DataObject implements ITile {
@@ -80,27 +70,7 @@ export class Tile extends DataObject implements ITile {
   }
 
   clearYieldCache(player: Player | null = null): void {
-    if (player === null) {
-      this.#yieldCache.clear();
-
-      return;
-    }
-
-    this.#yieldCache.set(player, new Map());
-  }
-
-  getYieldCache(player: Player | null = null): IYieldEntry {
-    const cacheCheck = this.#yieldCache.get(player);
-
-    if (cacheCheck) {
-      return cacheCheck;
-    }
-
-    const cache: IYieldEntry = new Map();
-
-    this.#yieldCache.set(player, cache);
-
-    return cache;
+    this.#yieldCache.delete(player);
   }
 
   getAdjacent(): Tile[] {
@@ -213,38 +183,11 @@ export class Tile extends DataObject implements ITile {
     return this.#map;
   }
 
-  resource(type: Yield, player: Player): Yield {
-    const yieldCache = this.getYieldCache(player);
-
-    if (yieldCache.has(<typeof Yield>type.constructor)) {
-      const cachedYield = yieldCache.get(<typeof Yield>type.constructor);
-
-      if (typeof cachedYield === 'number') {
-        type.add(cachedYield);
-
-        return type;
-      }
-    }
-
-    (this.#ruleRegistry as IYieldRegistry).process(
-      YieldRule,
-      type,
-      this,
-      player
-    );
-
-    yieldCache.set(<typeof Yield>type.constructor, type.value());
-
-    return type;
-  }
-
   score(
-    player: Player,
-    values: IYieldMap[] = [[Yield, 3]],
-    yieldEntries: typeof Yield[] = [],
-    yieldRegistry: YieldRegistry = yieldRegistryInstance
+    player: Player | null = null,
+    values: IYieldMap[] = [[Yield, 3]]
   ): number {
-    const yields = this.yields(player, yieldEntries, yieldRegistry);
+    const yields = this.yields(player);
 
     return (
       yields
@@ -287,18 +230,20 @@ export class Tile extends DataObject implements ITile {
     return this.#y;
   }
 
-  yields(
-    player: Player,
-    yields: typeof Yield[] = [],
-    yieldRegistry: YieldRegistry = yieldRegistryInstance
-  ): Yield[] {
-    if (yields.length === 0) {
-      yields = yieldRegistry.entries();
+  yields(player: Player | null = null): Yield[] {
+    if (!this.#yieldCache.has(player)) {
+      const tileYields = (this.#ruleRegistry as IYieldRegistry)
+        .process(YieldRule, this, player)
+        .flat();
+
+      (this.#ruleRegistry as IYieldModifierRegistry)
+        .process(YieldModifier, this, player, tileYields)
+        .flat();
+
+      this.#yieldCache.set(player, tileYields);
     }
 
-    return yields.map(
-      (YieldType: typeof Yield): Yield => this.resource(new YieldType(), player)
-    );
+    return this.#yieldCache.get(player)!;
   }
 }
 

@@ -2,29 +2,16 @@ import {
   EntityRegistry,
   IEntityRegistry,
 } from '@civ-clone/core-registry/EntityRegistry';
-import {
-  YieldRegistry,
-  instance as yieldRegistryInstance,
-} from '@civ-clone/core-yield/YieldRegistry';
 import { Tile, IYieldMap } from './Tile';
 import Player from '@civ-clone/core-player/Player';
 import Yield from '@civ-clone/core-yield/Yield';
 
 export interface ITileset extends IEntityRegistry<Tile> {
   push(...tiles: Tile[]): void;
-  score(
-    player: Player,
-    values?: IYieldMap[],
-    yieldEntries?: typeof Yield[],
-    yieldRegistry?: YieldRegistry
-  ): number;
+  score(player: Player, values?: IYieldMap[]): number;
   shift(): Tile;
   unregister(...entities: Tile[]): void;
-  yields(
-    player: Player,
-    yields: typeof Yield[],
-    yieldRegistry: YieldRegistry
-  ): Yield[];
+  yields(player: Player): Yield[];
 }
 
 export class Tileset extends EntityRegistry implements ITileset {
@@ -70,44 +57,15 @@ export class Tileset extends EntityRegistry implements ITileset {
     return first;
   }
 
-  score(
-    player: Player,
-    values: IYieldMap[] = [],
-    yieldEntries: typeof Yield[] = [],
-    yieldRegistry: YieldRegistry = yieldRegistryInstance
-  ): number {
-    return this.map((tile: Tile): number =>
-      tile.score(player, values, yieldEntries, yieldRegistry)
-    ).reduce((total: number, score: number): number => total + score, 0);
+  score(player: Player | null = null, values: IYieldMap[] = []): number {
+    return this.entries().reduce(
+      (total: number, tile: Tile): number => total + tile.score(player, values),
+      0
+    );
   }
 
-  yields(
-    player: Player,
-    yields: typeof Yield[] = [],
-    yieldRegistry: YieldRegistry = yieldRegistryInstance
-  ): Yield[] {
-    if (yields.length === 0) {
-      yields = yieldRegistry.entries();
-    }
-
-    return this.entries().reduce(
-      (tilesetYields: Yield[], tile: Tile): Yield[] =>
-        tile.yields(player, yields, yieldRegistry).map(
-          (tileYield: Yield): Yield => {
-            const [existingYield] = tilesetYields.filter(
-              (existingYield: Yield): boolean =>
-                existingYield instanceof tileYield.constructor
-            );
-
-            if (existingYield instanceof Yield) {
-              tileYield.add(existingYield, `tile-${tile.x()},${tile.y()}`);
-            }
-
-            return tileYield;
-          }
-        ),
-      yields.map((YieldType: typeof Yield): Yield => new YieldType())
-    );
+  yields(player: Player | null = null): Yield[] {
+    return this.entries().flatMap((tile) => tile.yields(player));
   }
 }
 

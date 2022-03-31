@@ -18,10 +18,10 @@ exports.Tile = void 0;
 const DataObject_1 = require("@civ-clone/core-data-object/DataObject");
 const Types_1 = require("@civ-clone/core-terrain/Types");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
-const YieldRegistry_1 = require("@civ-clone/core-yield/YieldRegistry");
+const Yield_1 = require("./Rules/Yield");
+const YieldModifier_1 = require("./Rules/YieldModifier");
 const Tileset_1 = require("./Tileset");
-const Yield_1 = require("@civ-clone/core-yield/Yield");
-const Yield_2 = require("./Rules/Yield");
+const Yield_2 = require("@civ-clone/core-yield/Yield");
 class Tile extends DataObject_1.DataObject {
     constructor(x, y, terrain, map, ruleRegistry = RuleRegistry_1.instance) {
         super();
@@ -40,20 +40,7 @@ class Tile extends DataObject_1.DataObject {
         this.addKey('terrain', 'isCoast', 'isLand', 'isWater', 'x', 'y', 'yields');
     }
     clearYieldCache(player = null) {
-        if (player === null) {
-            __classPrivateFieldGet(this, _yieldCache).clear();
-            return;
-        }
-        __classPrivateFieldGet(this, _yieldCache).set(player, new Map());
-    }
-    getYieldCache(player = null) {
-        const cacheCheck = __classPrivateFieldGet(this, _yieldCache).get(player);
-        if (cacheCheck) {
-            return cacheCheck;
-        }
-        const cache = new Map();
-        __classPrivateFieldGet(this, _yieldCache).set(player, cache);
-        return cache;
+        __classPrivateFieldGet(this, _yieldCache).delete(player);
     }
     getAdjacent() {
         return this.getAdjacentDirections().map((direction) => this.getNeighbour(direction));
@@ -132,21 +119,8 @@ class Tile extends DataObject_1.DataObject {
     map() {
         return __classPrivateFieldGet(this, _map);
     }
-    resource(type, player) {
-        const yieldCache = this.getYieldCache(player);
-        if (yieldCache.has(type.constructor)) {
-            const cachedYield = yieldCache.get(type.constructor);
-            if (typeof cachedYield === 'number') {
-                type.add(cachedYield);
-                return type;
-            }
-        }
-        __classPrivateFieldGet(this, _ruleRegistry).process(Yield_2.default, type, this, player);
-        yieldCache.set(type.constructor, type.value());
-        return type;
-    }
-    score(player, values = [[Yield_1.default, 3]], yieldEntries = [], yieldRegistry = YieldRegistry_1.instance) {
-        const yields = this.yields(player, yieldEntries, yieldRegistry);
+    score(player = null, values = [[Yield_2.default, 3]]) {
+        const yields = this.yields(player);
         return (yields
             .map((tileYield) => {
             const [value] = values.filter(([YieldType]) => tileYield instanceof YieldType), weight = value ? value[1] || 1 : 0;
@@ -171,11 +145,17 @@ class Tile extends DataObject_1.DataObject {
     y() {
         return __classPrivateFieldGet(this, _y);
     }
-    yields(player, yields = [], yieldRegistry = YieldRegistry_1.instance) {
-        if (yields.length === 0) {
-            yields = yieldRegistry.entries();
+    yields(player = null) {
+        if (!__classPrivateFieldGet(this, _yieldCache).has(player)) {
+            const tileYields = __classPrivateFieldGet(this, _ruleRegistry)
+                .process(Yield_1.Yield, this, player)
+                .flat();
+            __classPrivateFieldGet(this, _ruleRegistry)
+                .process(YieldModifier_1.YieldModifier, this, player, tileYields)
+                .flat();
+            __classPrivateFieldGet(this, _yieldCache).set(player, tileYields);
         }
-        return yields.map((YieldType) => this.resource(new YieldType(), player));
+        return __classPrivateFieldGet(this, _yieldCache).get(player);
     }
 }
 exports.Tile = Tile;

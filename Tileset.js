@@ -2,9 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Tileset = void 0;
 const EntityRegistry_1 = require("@civ-clone/core-registry/EntityRegistry");
-const YieldRegistry_1 = require("@civ-clone/core-yield/YieldRegistry");
 const Tile_1 = require("./Tile");
-const Yield_1 = require("@civ-clone/core-yield/Yield");
 class Tileset extends EntityRegistry_1.EntityRegistry {
     static from(...tiles) {
         return new this(...tiles);
@@ -33,20 +31,11 @@ class Tileset extends EntityRegistry_1.EntityRegistry {
         this.unregister(first);
         return first;
     }
-    score(player, values = [], yieldEntries = [], yieldRegistry = YieldRegistry_1.instance) {
-        return this.map((tile) => tile.score(player, values, yieldEntries, yieldRegistry)).reduce((total, score) => total + score, 0);
+    score(player = null, values = []) {
+        return this.entries().reduce((total, tile) => total + tile.score(player, values), 0);
     }
-    yields(player, yields = [], yieldRegistry = YieldRegistry_1.instance) {
-        if (yields.length === 0) {
-            yields = yieldRegistry.entries();
-        }
-        return this.entries().reduce((tilesetYields, tile) => tile.yields(player, yields, yieldRegistry).map((tileYield) => {
-            const [existingYield] = tilesetYields.filter((existingYield) => existingYield instanceof tileYield.constructor);
-            if (existingYield instanceof Yield_1.default) {
-                tileYield.add(existingYield, `tile-${tile.x()},${tile.y()}`);
-            }
-            return tileYield;
-        }), yields.map((YieldType) => new YieldType()));
+    yields(player = null) {
+        return this.entries().flatMap((tile) => tile.yields(player));
     }
 }
 exports.Tileset = Tileset;
