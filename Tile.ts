@@ -189,29 +189,16 @@ export class Tile extends DataObject implements ITile {
   ): number {
     const yields = this.yields(player);
 
-    return (
-      yields
-        .map((tileYield: Yield): number => {
-          const [value]: IYieldMap[] = values.filter(
-              ([YieldType]: IYieldMap): boolean =>
-                tileYield instanceof YieldType
-            ),
-            weight: number = value ? value[1] || 1 : 0;
+    return yields
+      .map((tileYield: Yield): number => {
+        const [value]: IYieldMap[] = values.filter(
+            ([YieldType]: IYieldMap): boolean => tileYield instanceof YieldType
+          ),
+          weight: number = value ? value[1] || 1 : 0;
 
-          return tileYield.value() * weight;
-        })
-        .reduce((total: number, value: number): number => total + value, 0) *
-      // Ensure we have some of each scored yield
-      (values.every(
-        ([YieldType, value]: IYieldMap) =>
-          value < 1 ||
-          yields.some(
-            (tileYield: Yield): boolean => tileYield instanceof YieldType
-          )
-      )
-        ? 1
-        : 0)
-    );
+        return tileYield.value() * weight;
+      })
+      .reduce((total: number, value: number): number => total + value, 0);
   }
 
   terrain(): Terrain {
