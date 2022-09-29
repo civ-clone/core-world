@@ -3,15 +3,15 @@ import {
   DataObject,
   IDataObject,
 } from '@civ-clone/core-data-object/DataObject';
-import { EntityRegistry } from '@civ-clone/core-registry/EntityRegistry';
 import {
   RuleRegistry,
   instance as ruleRegistryInstance,
 } from '@civ-clone/core-rule/RuleRegistry';
+import EntityRegistry from '@civ-clone/core-registry/EntityRegistry';
 import Generator from '@civ-clone/core-world-generator/Generator';
+import { IRegistryIterator } from '@civ-clone/core-registry/Registry';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tile from './Tile';
-import { IRegistryFilter } from '@civ-clone/core-registry/Registry';
 
 export interface IWorld extends IDataObject {
   build(ruleRegistry: RuleRegistry): Promise<World>;
@@ -62,7 +62,7 @@ export class World extends DataObject implements IWorld {
     return this.#tiles.entries();
   }
 
-  filter(iterator: IRegistryFilter<Tile>): Tile[] {
+  filter(iterator: IRegistryIterator<Tile>): Tile[] {
     return this.entries().filter(iterator);
   }
 

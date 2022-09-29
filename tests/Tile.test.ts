@@ -4,7 +4,6 @@ import {
   generateTile,
   generateWorld,
 } from './lib/buildWorld';
-import Criterion from '@civ-clone/core-rule/Criterion';
 import Effect from '@civ-clone/core-rule/Effect';
 import Player from '@civ-clone/core-player/Player';
 import RuleRegistry from '@civ-clone/core-rule/RuleRegistry';
@@ -88,14 +87,6 @@ describe('Tile', (): void => {
       tile.score(new Player(ruleRegistry), [[TestYield, 0]]),
       'Should default the score to 1 for `Yield`s marked with `0`'
     ).to.equal(2);
-
-    expect(
-      tile.score(new Player(ruleRegistry), [
-        [TestYield, 0],
-        [class extends Yield {}, 1],
-      ]),
-      'Should return a score of 0 for tiles missing some of the rated `Yield`s.'
-    ).to.equal(0);
 
     expect(
       tile.score(new Player(ruleRegistry), [

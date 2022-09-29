@@ -15,15 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.World = void 0;
 const Built_1 = require("./Rules/Built");
 const DataObject_1 = require("@civ-clone/core-data-object/DataObject");
-const EntityRegistry_1 = require("@civ-clone/core-registry/EntityRegistry");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
+const EntityRegistry_1 = require("@civ-clone/core-registry/EntityRegistry");
 const Tile_1 = require("./Tile");
 class World extends DataObject_1.DataObject {
     constructor(generator) {
         super();
         _World_generator.set(this, void 0);
         _World_height.set(this, void 0);
-        _World_tiles.set(this, new EntityRegistry_1.EntityRegistry(Tile_1.default));
+        _World_tiles.set(this, new EntityRegistry_1.default(Tile_1.default));
         _World_width.set(this, void 0);
         __classPrivateFieldSet(this, _World_generator, generator, "f");
         __classPrivateFieldSet(this, _World_height, generator.height(), "f");
