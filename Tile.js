@@ -16,10 +16,10 @@ exports.Tile = void 0;
 const DataObject_1 = require("@civ-clone/core-data-object/DataObject");
 const Types_1 = require("@civ-clone/core-terrain/Types");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
-const Yield_1 = require("./Rules/Yield");
-const YieldModifier_1 = require("./Rules/YieldModifier");
 const Tileset_1 = require("./Tileset");
-const Yield_2 = require("@civ-clone/core-yield/Yield");
+const Yield_1 = require("@civ-clone/core-yield/Yield");
+const YieldModifier_1 = require("./Rules/YieldModifier");
+const Yield_2 = require("./Rules/Yield");
 class Tile extends DataObject_1.DataObject {
     constructor(x, y, terrain, map, ruleRegistry = RuleRegistry_1.instance) {
         super();
@@ -117,7 +117,7 @@ class Tile extends DataObject_1.DataObject {
     map() {
         return __classPrivateFieldGet(this, _Tile_map, "f");
     }
-    score(player = null, values = [[Yield_2.default, 3]]) {
+    score(player = null, values = [[Yield_1.default, 3]]) {
         const yields = this.yields(player);
         return yields
             .map((tileYield) => {
@@ -141,10 +141,10 @@ class Tile extends DataObject_1.DataObject {
     yields(player = null) {
         if (!__classPrivateFieldGet(this, _Tile_yieldCache, "f").has(player)) {
             const tileYields = __classPrivateFieldGet(this, _Tile_ruleRegistry, "f")
-                .process(Yield_1.Yield, this, player)
+                .process(Yield_2.default, this, player)
                 .flat();
             __classPrivateFieldGet(this, _Tile_ruleRegistry, "f")
-                .process(YieldModifier_1.YieldModifier, this, player, tileYields)
+                .process(YieldModifier_1.default, this, player, tileYields)
                 .flat();
             __classPrivateFieldGet(this, _Tile_yieldCache, "f").set(player, tileYields);
         }

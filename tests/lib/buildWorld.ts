@@ -45,9 +45,9 @@ export const generateWorld: (
   generator: Generator = generateGenerator(10, 10, Land),
   ruleRegistry: RuleRegistry = ruleRegistryInstance
 ) => {
-  const world = new World(generator);
+  const world = new World(generator, ruleRegistry);
 
-  return world.build(ruleRegistry);
+  return world.build();
 };
 
 export const generateTile: (ruleRegistry?: RuleRegistry) => Promise<Tile> = (

@@ -31,8 +31,8 @@ describe('World', (): void => {
   });
 
   it('should process `Built` `Rule`s when built', (done): void => {
-    const world = new World(generateGenerator()),
-      ruleRegistry = new RuleRegistry();
+    const ruleRegistry = new RuleRegistry(),
+      world = new World(generateGenerator(), ruleRegistry);
 
     ruleRegistry.register(
       new Built(
@@ -44,6 +44,6 @@ describe('World', (): void => {
       )
     );
 
-    world.build(ruleRegistry);
+    world.build();
   });
 });

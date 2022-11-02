@@ -7,15 +7,15 @@ import Generator from '@civ-clone/core-world-generator/Generator';
 import { IRegistryIterator } from '@civ-clone/core-registry/Registry';
 import Tile from './Tile';
 export interface IWorld extends IDataObject {
-  build(ruleRegistry: RuleRegistry): Promise<World>;
+  build(): Promise<World>;
   get(x: number, y: number): Tile;
   height(): number;
   width(): number;
 }
 export declare class World extends DataObject implements IWorld {
   #private;
-  constructor(generator: Generator);
-  build(ruleRegistry?: RuleRegistry): Promise<World>;
+  constructor(generator: Generator, ruleRegistry?: RuleRegistry);
+  build(): Promise<World>;
   entries(): Tile[];
   filter(iterator: IRegistryIterator<Tile>): Tile[];
   forEach(iterator: (item: Tile, i: number) => void): void;

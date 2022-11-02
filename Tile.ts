@@ -7,13 +7,13 @@ import {
   RuleRegistry,
   instance as ruleRegistryInstance,
 } from '@civ-clone/core-rule/RuleRegistry';
-import { Yield as YieldRule, IYieldRegistry } from './Rules/Yield';
-import { YieldModifier, IYieldModifierRegistry } from './Rules/YieldModifier';
 import Player from '@civ-clone/core-player/Player';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tileset from './Tileset';
 import World from './World';
 import Yield from '@civ-clone/core-yield/Yield';
+import YieldModifier from './Rules/YieldModifier';
+import YieldRule from './Rules/Yield';
 
 export type IAdjacentTiles = 'n' | 'e' | 's' | 'w';
 export type INeighbouringTiles = IAdjacentTiles | 'ne' | 'se' | 'sw' | 'nw';
@@ -219,11 +219,11 @@ export class Tile extends DataObject implements ITile {
 
   yields(player: Player | null = null): Yield[] {
     if (!this.#yieldCache.has(player)) {
-      const tileYields = (this.#ruleRegistry as IYieldRegistry)
+      const tileYields = this.#ruleRegistry
         .process(YieldRule, this, player)
         .flat();
 
-      (this.#ruleRegistry as IYieldModifierRegistry)
+      this.#ruleRegistry
         .process(YieldModifier, this, player, tileYields)
         .flat();
 

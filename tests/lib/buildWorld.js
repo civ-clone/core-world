@@ -35,8 +35,8 @@ _FillGenerator_TerrainType = new WeakMap();
 const generateGenerator = (height = 10, width = 10, TerrainType = Terrain_1.default) => new FillGenerator(height, width, TerrainType);
 exports.generateGenerator = generateGenerator;
 const generateWorld = (generator = (0, exports.generateGenerator)(10, 10, Types_1.Land), ruleRegistry = RuleRegistry_1.instance) => {
-    const world = new World_1.default(generator);
-    return world.build(ruleRegistry);
+    const world = new World_1.default(generator, ruleRegistry);
+    return world.build();
 };
 exports.generateWorld = generateWorld;
 const generateTile = (ruleRegistry = RuleRegistry_1.instance) => new Promise((resolve) => (0, exports.generateWorld)((0, exports.generateGenerator)(1, 1), ruleRegistry).then((world) => resolve(world.get(0, 0))));

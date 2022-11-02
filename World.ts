@@ -1,4 +1,3 @@
-import { Built, IBuiltRegistry } from './Rules/Built';
 import {
   DataObject,
   IDataObject,
@@ -7,6 +6,7 @@ import {
   RuleRegistry,
   instance as ruleRegistryInstance,
 } from '@civ-clone/core-rule/RuleRegistry';
+import Built from './Rules/Built';
 import EntityRegistry from '@civ-clone/core-registry/EntityRegistry';
 import Generator from '@civ-clone/core-world-generator/Generator';
 import { IRegistryIterator } from '@civ-clone/core-registry/Registry';
@@ -14,7 +14,7 @@ import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tile from './Tile';
 
 export interface IWorld extends IDataObject {
-  build(ruleRegistry: RuleRegistry): Promise<World>;
+  build(): Promise<World>;
   get(x: number, y: number): Tile;
   height(): number;
   width(): number;
@@ -23,20 +23,25 @@ export interface IWorld extends IDataObject {
 export class World extends DataObject implements IWorld {
   #generator: Generator;
   #height: number;
+  #ruleRegistry: RuleRegistry;
   #tiles: EntityRegistry<Tile> = new EntityRegistry(Tile);
   #width: number;
 
-  constructor(generator: Generator) {
+  constructor(
+    generator: Generator,
+    ruleRegistry: RuleRegistry = ruleRegistryInstance
+  ) {
     super();
 
     this.#generator = generator;
     this.#height = generator.height();
     this.#width = generator.width();
+    this.#ruleRegistry = ruleRegistry;
 
     this.addKey('height', 'tiles', 'width');
   }
 
-  build(ruleRegistry: RuleRegistry = ruleRegistryInstance): Promise<World> {
+  build(): Promise<World> {
     return new Promise<World>((resolve) => {
       this.#generator.generate().then((tiles: Terrain[]) => {
         tiles.forEach((terrain: Terrain, i: number): void => {
@@ -45,13 +50,13 @@ export class World extends DataObject implements IWorld {
             Math.floor(i / this.#width),
             terrain,
             this,
-            ruleRegistry
+            this.#ruleRegistry
           );
 
           this.#tiles.register(tile);
         });
 
-        (ruleRegistry as IBuiltRegistry).process(Built, this);
+        this.#ruleRegistry.process(Built, this);
 
         resolve(this);
       });
