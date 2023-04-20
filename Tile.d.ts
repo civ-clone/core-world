@@ -8,14 +8,9 @@ import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tileset from './Tileset';
 import World from './World';
 import Yield from '@civ-clone/core-yield/Yield';
-export declare type IAdjacentTiles = 'n' | 'e' | 's' | 'w';
-export declare type INeighbouringTiles =
-  | IAdjacentTiles
-  | 'ne'
-  | 'se'
-  | 'sw'
-  | 'nw';
-export declare type IYieldMap = [typeof Yield, number];
+export type IAdjacentTiles = 'n' | 'e' | 's' | 'w';
+export type INeighbouringTiles = IAdjacentTiles | 'ne' | 'se' | 'sw' | 'nw';
+export type IYieldMap = [typeof Yield, number];
 export interface ITile extends IDataObject {
   clearYieldCache(player: Player | null): void;
   getAdjacent(): Tile[];
