@@ -22,4 +22,6 @@ export class LandMassRegistry
   }
 }
 
+export const instance = new LandMassRegistry();
+
 export default LandMassRegistry;

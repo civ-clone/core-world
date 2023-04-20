@@ -13,4 +13,5 @@ export declare class LandMassRegistry
 {
   getByTile(tile: Land): LandMass;
 }
+export declare const instance: LandMassRegistry;
 export default LandMassRegistry;

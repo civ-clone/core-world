@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LandMassRegistry = void 0;
+exports.instance = exports.LandMassRegistry = void 0;
 const EntityRegistry_1 = require("@civ-clone/core-registry/EntityRegistry");
 class LandMassRegistry extends EntityRegistry_1.EntityRegistry {
     getByTile(tile) {
@@ -9,5 +9,6 @@ class LandMassRegistry extends EntityRegistry_1.EntityRegistry {
     }
 }
 exports.LandMassRegistry = LandMassRegistry;
+exports.instance = new LandMassRegistry();
 exports.default = LandMassRegistry;
 //# sourceMappingURL=LandMassRegistry.js.map
