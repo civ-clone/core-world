@@ -1,12 +1,13 @@
 import DataObject from '@civ-clone/core-data-object/DataObject';
-import { Land } from '@civ-clone/core-terrain/Types';
+import Tile from './Tile';
 export interface ILandMass extends DataObject {
-  addTiles(tiles: Land[]): void;
-  hasTile(tile: Land): boolean;
+  hasTile(tile: Tile): boolean;
+  tiles(): Tile[];
 }
 export declare class LandMass extends DataObject implements ILandMass {
   #private;
-  addTiles(tiles: Land[]): void;
-  hasTile(tile: Land): boolean;
+  constructor(tiles: Tile[]);
+  hasTile(tile: Tile): boolean;
+  tiles(): Tile[];
 }
 export default LandMass;

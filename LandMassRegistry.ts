@@ -2,18 +2,22 @@ import {
   EntityRegistry,
   IEntityRegistry,
 } from '@civ-clone/core-registry/EntityRegistry';
-import { Land } from '@civ-clone/core-terrain/Types';
 import LandMass from './LandMass';
+import Tile from './Tile';
 
 export interface ILandMassRegistry extends IEntityRegistry<LandMass> {
-  getByTile(tile: Land): LandMass | null;
+  getByTile(tile: Tile): LandMass | null;
 }
 
 export class LandMassRegistry
   extends EntityRegistry<LandMass>
   implements ILandMassRegistry
 {
-  getByTile(tile: Land): LandMass {
+  constructor() {
+    super(LandMass);
+  }
+
+  getByTile(tile: Tile): LandMass | null {
     const [landMass] = this.entries().filter((landMass) =>
       landMass.hasTile(tile)
     );

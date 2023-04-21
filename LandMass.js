@@ -9,15 +9,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LandMass = void 0;
 const DataObject_1 = require("@civ-clone/core-data-object/DataObject");
 class LandMass extends DataObject_1.default {
-    constructor() {
-        super(...arguments);
+    constructor(tiles) {
+        super();
         _LandMass_tiles.set(this, []);
-    }
-    addTiles(tiles) {
         tiles.forEach((tile) => __classPrivateFieldGet(this, _LandMass_tiles, "f").push(tile));
     }
     hasTile(tile) {
         return __classPrivateFieldGet(this, _LandMass_tiles, "f").includes(tile);
+    }
+    tiles() {
+        return __classPrivateFieldGet(this, _LandMass_tiles, "f");
     }
 }
 exports.LandMass = LandMass;
