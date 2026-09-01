@@ -7,20 +7,20 @@ export interface ILandMass extends DataObject {
 }
 
 export class LandMass extends DataObject implements ILandMass {
-  #tiles: Tile[] = [];
+  private _tiles: Tile[] = [];
 
   constructor(tiles: Tile[]) {
     super();
 
-    tiles.forEach((tile) => this.#tiles.push(tile));
+    tiles.forEach((tile) => this._tiles.push(tile));
   }
 
   hasTile(tile: Tile): boolean {
-    return this.#tiles.includes(tile);
+    return this._tiles.includes(tile);
   }
 
   tiles(): Tile[] {
-    return this.#tiles;
+    return this._tiles;
   }
 }
 

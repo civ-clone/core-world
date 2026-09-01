@@ -33,7 +33,13 @@ export interface ITile extends IDataObject {
   yields(player: Player | null): Yield[];
 }
 export declare class Tile extends DataObject implements ITile {
-  #private;
+  private _map;
+  private _neighbours;
+  private _ruleRegistry;
+  private _terrain;
+  private _x;
+  private _y;
+  private _yieldCache;
   constructor(
     x: number,
     y: number,

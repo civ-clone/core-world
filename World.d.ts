@@ -22,7 +22,12 @@ export interface IWorld extends IDataObject {
   width(): number;
 }
 export declare class World extends DataObject implements IWorld {
-  #private;
+  private _generator;
+  private _height;
+  private _landMassRegistry;
+  private _ruleRegistry;
+  private _tiles;
+  private _width;
   constructor(
     generator: Generator,
     ruleRegistry?: RuleRegistry,

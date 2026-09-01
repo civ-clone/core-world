@@ -1,16 +1,4 @@
 "use strict";
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
-var _Tile_map, _Tile_neighbours, _Tile_ruleRegistry, _Tile_terrain, _Tile_x, _Tile_y, _Tile_yieldCache;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Tile = void 0;
 const DataObject_1 = require("@civ-clone/core-data-object/DataObject");
@@ -23,22 +11,17 @@ const Yield_2 = require("./Rules/Yield");
 class Tile extends DataObject_1.DataObject {
     constructor(x, y, terrain, map, ruleRegistry = RuleRegistry_1.instance) {
         super();
-        _Tile_map.set(this, void 0);
-        _Tile_neighbours.set(this, []);
-        _Tile_ruleRegistry.set(this, void 0);
-        _Tile_terrain.set(this, void 0);
-        _Tile_x.set(this, void 0);
-        _Tile_y.set(this, void 0);
-        _Tile_yieldCache.set(this, new Map());
-        __classPrivateFieldSet(this, _Tile_x, x, "f");
-        __classPrivateFieldSet(this, _Tile_y, y, "f");
-        __classPrivateFieldSet(this, _Tile_terrain, terrain, "f");
-        __classPrivateFieldSet(this, _Tile_map, map, "f");
-        __classPrivateFieldSet(this, _Tile_ruleRegistry, ruleRegistry, "f");
+        this._neighbours = [];
+        this._yieldCache = new Map();
+        this._x = x;
+        this._y = y;
+        this._terrain = terrain;
+        this._map = map;
+        this._ruleRegistry = ruleRegistry;
         this.addKey('terrain', 'isCoast', 'isLand', 'isWater', 'x', 'y', 'yields');
     }
     clearYieldCache(player = null) {
-        __classPrivateFieldGet(this, _Tile_yieldCache, "f").delete(player);
+        this._yieldCache.delete(player);
     }
     getAdjacent() {
         return this.getAdjacentDirections().map((direction) => this.getNeighbour(direction));
@@ -48,36 +31,36 @@ class Tile extends DataObject_1.DataObject {
     }
     getNeighbour(direction) {
         if (direction === 'n') {
-            return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f"), __classPrivateFieldGet(this, _Tile_y, "f") - 1);
+            return this._map.get(this._x, this._y - 1);
         }
         if (direction === 'ne') {
-            return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f") + 1, __classPrivateFieldGet(this, _Tile_y, "f") - 1);
+            return this._map.get(this._x + 1, this._y - 1);
         }
         if (direction === 'e') {
-            return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f") + 1, __classPrivateFieldGet(this, _Tile_y, "f"));
+            return this._map.get(this._x + 1, this._y);
         }
         if (direction === 'se') {
-            return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f") + 1, __classPrivateFieldGet(this, _Tile_y, "f") + 1);
+            return this._map.get(this._x + 1, this._y + 1);
         }
         if (direction === 's') {
-            return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f"), __classPrivateFieldGet(this, _Tile_y, "f") + 1);
+            return this._map.get(this._x, this._y + 1);
         }
         if (direction === 'sw') {
-            return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f") - 1, __classPrivateFieldGet(this, _Tile_y, "f") + 1);
+            return this._map.get(this._x - 1, this._y + 1);
         }
         if (direction === 'w') {
-            return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f") - 1, __classPrivateFieldGet(this, _Tile_y, "f"));
+            return this._map.get(this._x - 1, this._y);
         }
-        return __classPrivateFieldGet(this, _Tile_map, "f").get(__classPrivateFieldGet(this, _Tile_x, "f") - 1, __classPrivateFieldGet(this, _Tile_y, "f") - 1);
+        return this._map.get(this._x - 1, this._y - 1);
     }
     getNeighbouringDirections() {
         return ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
     }
     getNeighbours() {
-        if (!__classPrivateFieldGet(this, _Tile_neighbours, "f").length) {
-            __classPrivateFieldSet(this, _Tile_neighbours, this.getNeighbouringDirections().map((direction) => this.getNeighbour(direction)), "f");
+        if (!this._neighbours.length) {
+            this._neighbours = this.getNeighbouringDirections().map((direction) => this.getNeighbour(direction));
         }
-        return __classPrivateFieldGet(this, _Tile_neighbours, "f");
+        return this._neighbours;
     }
     getSurroundingArea(radius = 2) {
         return Tileset_1.default.fromSurrounding(this, radius);
@@ -94,7 +77,7 @@ class Tile extends DataObject_1.DataObject {
             [1, 0],
             [1, -1],
         ], [shortestDistance] = map
-            .map(([x, y]) => Math.hypot(__classPrivateFieldGet(this, _Tile_x, "f") - tile.x() + x * __classPrivateFieldGet(this, _Tile_map, "f").width(), __classPrivateFieldGet(this, _Tile_y, "f") - tile.y() + y * __classPrivateFieldGet(this, _Tile_map, "f").height()))
+            .map(([x, y]) => Math.hypot(this._x - tile.x() + x * this._map.width(), this._y - tile.y() + y * this._map.height()))
             .sort((a, b) => a - b);
         return shortestDistance;
     }
@@ -106,16 +89,16 @@ class Tile extends DataObject_1.DataObject {
                 tile.getNeighbours().some((tile) => tile.isWater())));
     }
     isLand() {
-        return __classPrivateFieldGet(this, _Tile_terrain, "f") instanceof Types_1.Land;
+        return this._terrain instanceof Types_1.Land;
     }
     isNeighbourOf(otherTile) {
         return this.getNeighbours().includes(otherTile);
     }
     isWater() {
-        return __classPrivateFieldGet(this, _Tile_terrain, "f") instanceof Types_1.Water;
+        return this._terrain instanceof Types_1.Water;
     }
     map() {
-        return __classPrivateFieldGet(this, _Tile_map, "f");
+        return this._map;
     }
     score(player = null, values = [[Yield_1.default, 3]]) {
         const yields = this.yields(player);
@@ -127,31 +110,30 @@ class Tile extends DataObject_1.DataObject {
             .reduce((total, value) => total + value, 0);
     }
     terrain() {
-        return __classPrivateFieldGet(this, _Tile_terrain, "f");
+        return this._terrain;
     }
     setTerrain(terrain) {
-        __classPrivateFieldSet(this, _Tile_terrain, terrain, "f");
+        this._terrain = terrain;
     }
     x() {
-        return __classPrivateFieldGet(this, _Tile_x, "f");
+        return this._x;
     }
     y() {
-        return __classPrivateFieldGet(this, _Tile_y, "f");
+        return this._y;
     }
     yields(player = null) {
-        if (!__classPrivateFieldGet(this, _Tile_yieldCache, "f").has(player)) {
-            const tileYields = __classPrivateFieldGet(this, _Tile_ruleRegistry, "f")
+        if (!this._yieldCache.has(player)) {
+            const tileYields = this._ruleRegistry
                 .process(Yield_2.default, this, player)
                 .flat();
-            __classPrivateFieldGet(this, _Tile_ruleRegistry, "f")
+            this._ruleRegistry
                 .process(YieldModifier_1.default, this, player, tileYields)
                 .flat();
-            __classPrivateFieldGet(this, _Tile_yieldCache, "f").set(player, tileYields);
+            this._yieldCache.set(player, tileYields);
         }
-        return __classPrivateFieldGet(this, _Tile_yieldCache, "f").get(player);
+        return this._yieldCache.get(player);
     }
 }
 exports.Tile = Tile;
-_Tile_map = new WeakMap(), _Tile_neighbours = new WeakMap(), _Tile_ruleRegistry = new WeakMap(), _Tile_terrain = new WeakMap(), _Tile_x = new WeakMap(), _Tile_y = new WeakMap(), _Tile_yieldCache = new WeakMap();
 exports.default = Tile;
 //# sourceMappingURL=Tile.js.map

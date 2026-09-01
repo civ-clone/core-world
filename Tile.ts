@@ -43,13 +43,13 @@ export interface ITile extends IDataObject {
 }
 
 export class Tile extends DataObject implements ITile {
-  #map: World;
-  #neighbours: Tile[] = [];
-  #ruleRegistry: RuleRegistry;
-  #terrain: Terrain;
-  #x: number;
-  #y: number;
-  #yieldCache: IYieldCache = new Map();
+  private _map: World;
+  private _neighbours: Tile[] = [];
+  private _ruleRegistry: RuleRegistry;
+  private _terrain: Terrain;
+  private _x: number;
+  private _y: number;
+  private _yieldCache: IYieldCache = new Map();
 
   constructor(
     x: number,
@@ -60,17 +60,17 @@ export class Tile extends DataObject implements ITile {
   ) {
     super();
 
-    this.#x = x;
-    this.#y = y;
-    this.#terrain = terrain;
-    this.#map = map;
-    this.#ruleRegistry = ruleRegistry;
+    this._x = x;
+    this._y = y;
+    this._terrain = terrain;
+    this._map = map;
+    this._ruleRegistry = ruleRegistry;
 
     this.addKey('terrain', 'isCoast', 'isLand', 'isWater', 'x', 'y', 'yields');
   }
 
   clearYieldCache(player: Player | null = null): void {
-    this.#yieldCache.delete(player);
+    this._yieldCache.delete(player);
   }
 
   getAdjacent(): Tile[] {
@@ -85,34 +85,34 @@ export class Tile extends DataObject implements ITile {
 
   getNeighbour(direction: INeighbouringTiles): Tile {
     if (direction === 'n') {
-      return this.#map.get(this.#x, this.#y - 1);
+      return this._map.get(this._x, this._y - 1);
     }
 
     if (direction === 'ne') {
-      return this.#map.get(this.#x + 1, this.#y - 1);
+      return this._map.get(this._x + 1, this._y - 1);
     }
 
     if (direction === 'e') {
-      return this.#map.get(this.#x + 1, this.#y);
+      return this._map.get(this._x + 1, this._y);
     }
 
     if (direction === 'se') {
-      return this.#map.get(this.#x + 1, this.#y + 1);
+      return this._map.get(this._x + 1, this._y + 1);
     }
 
     if (direction === 's') {
-      return this.#map.get(this.#x, this.#y + 1);
+      return this._map.get(this._x, this._y + 1);
     }
 
     if (direction === 'sw') {
-      return this.#map.get(this.#x - 1, this.#y + 1);
+      return this._map.get(this._x - 1, this._y + 1);
     }
 
     if (direction === 'w') {
-      return this.#map.get(this.#x - 1, this.#y);
+      return this._map.get(this._x - 1, this._y);
     }
 
-    return this.#map.get(this.#x - 1, this.#y - 1);
+    return this._map.get(this._x - 1, this._y - 1);
   }
 
   getNeighbouringDirections(): INeighbouringTiles[] {
@@ -120,13 +120,13 @@ export class Tile extends DataObject implements ITile {
   }
 
   getNeighbours(): Tile[] {
-    if (!this.#neighbours.length) {
-      this.#neighbours = this.getNeighbouringDirections().map(
+    if (!this._neighbours.length) {
+      this._neighbours = this.getNeighbouringDirections().map(
         (direction: INeighbouringTiles): Tile => this.getNeighbour(direction)
       );
     }
 
-    return this.#neighbours;
+    return this._neighbours;
   }
 
   getSurroundingArea(radius: number = 2): Tileset {
@@ -148,8 +148,8 @@ export class Tile extends DataObject implements ITile {
       [shortestDistance] = map
         .map(([x, y]: [number, number]): number =>
           Math.hypot(
-            this.#x - tile.x() + x * this.#map.width(),
-            this.#y - tile.y() + y * this.#map.height()
+            this._x - tile.x() + x * this._map.width(),
+            this._y - tile.y() + y * this._map.height()
           )
         )
         .sort((a: number, b: number): number => a - b);
@@ -168,7 +168,7 @@ export class Tile extends DataObject implements ITile {
   }
 
   isLand(): boolean {
-    return this.#terrain instanceof Land;
+    return this._terrain instanceof Land;
   }
 
   isNeighbourOf(otherTile: Tile): boolean {
@@ -176,11 +176,11 @@ export class Tile extends DataObject implements ITile {
   }
 
   isWater(): boolean {
-    return this.#terrain instanceof Water;
+    return this._terrain instanceof Water;
   }
 
   map(): World {
-    return this.#map;
+    return this._map;
   }
 
   score(
@@ -202,35 +202,35 @@ export class Tile extends DataObject implements ITile {
   }
 
   terrain(): Terrain {
-    return this.#terrain;
+    return this._terrain;
   }
 
   setTerrain(terrain: Terrain): void {
-    this.#terrain = terrain;
+    this._terrain = terrain;
   }
 
   x(): number {
-    return this.#x;
+    return this._x;
   }
 
   y(): number {
-    return this.#y;
+    return this._y;
   }
 
   yields(player: Player | null = null): Yield[] {
-    if (!this.#yieldCache.has(player)) {
-      const tileYields = this.#ruleRegistry
+    if (!this._yieldCache.has(player)) {
+      const tileYields = this._ruleRegistry
         .process(YieldRule, this, player)
         .flat();
 
-      this.#ruleRegistry
+      this._ruleRegistry
         .process(YieldModifier, this, player, tileYields)
         .flat();
 
-      this.#yieldCache.set(player, tileYields);
+      this._yieldCache.set(player, tileYields);
     }
 
-    return this.#yieldCache.get(player)!;
+    return this._yieldCache.get(player)!;
   }
 }
 

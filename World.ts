@@ -33,12 +33,12 @@ export interface IWorld extends IDataObject {
 }
 
 export class World extends DataObject implements IWorld {
-  #generator: Generator;
-  #height: number;
-  #landMassRegistry: LandMassRegistry;
-  #ruleRegistry: RuleRegistry;
-  #tiles: EntityRegistry<Tile> = new EntityRegistry(Tile);
-  #width: number;
+  private _generator: Generator;
+  private _height: number;
+  private _landMassRegistry: LandMassRegistry;
+  private _ruleRegistry: RuleRegistry;
+  private _tiles: EntityRegistry<Tile> = new EntityRegistry(Tile);
+  private _width: number;
 
   constructor(
     generator: Generator,
@@ -47,29 +47,29 @@ export class World extends DataObject implements IWorld {
   ) {
     super();
 
-    this.#generator = generator;
-    this.#height = generator.height();
-    this.#landMassRegistry = landMassRegistry;
-    this.#width = generator.width();
-    this.#ruleRegistry = ruleRegistry;
+    this._generator = generator;
+    this._height = generator.height();
+    this._landMassRegistry = landMassRegistry;
+    this._width = generator.width();
+    this._ruleRegistry = ruleRegistry;
 
     this.addKey('height', 'tiles', 'width');
   }
 
   async build(): Promise<World> {
-    const tiles = await this.#generator.generate(),
+    const tiles = await this._generator.generate(),
       landTiles: Tile[] = [];
 
     tiles.forEach((terrain: Terrain, i: number): void => {
       const tile = new Tile(
-        i % this.#width,
-        Math.floor(i / this.#width),
+        i % this._width,
+        Math.floor(i / this._width),
         terrain,
         this,
-        this.#ruleRegistry
+        this._ruleRegistry
       );
 
-      this.#tiles.register(tile);
+      this._tiles.register(tile);
 
       if (tile.isLand()) {
         landTiles.push(tile);
@@ -100,16 +100,16 @@ export class World extends DataObject implements IWorld {
         });
       }
 
-      this.#landMassRegistry.register(new LandMass(continent));
+      this._landMassRegistry.register(new LandMass(continent));
     }
 
-    this.#ruleRegistry.process(Built, this);
+    this._ruleRegistry.process(Built, this);
 
     return this;
   }
 
   entries(): Tile[] {
-    return this.#tiles.entries();
+    return this._tiles.entries();
   }
 
   filter(iterator: IRegistryIterator<Tile>): Tile[] {
@@ -117,31 +117,31 @@ export class World extends DataObject implements IWorld {
   }
 
   forEach(iterator: (item: Tile, i: number) => void): void {
-    return this.#tiles.forEach(iterator);
+    return this._tiles.forEach(iterator);
   }
 
   get(x: number, y: number): Tile {
-    return this.entries()[this.#generator.coordsToIndex(x, y)];
+    return this.entries()[this._generator.coordsToIndex(x, y)];
   }
 
   height(): number {
-    return this.#height;
+    return this._height;
   }
 
   includes(tile: Tile): boolean {
-    return this.#tiles.includes(tile);
+    return this._tiles.includes(tile);
   }
 
   landMasses(): LandMass[] {
-    return this.#landMassRegistry.entries();
+    return this._landMassRegistry.entries();
   }
 
   map(iterator: (item: Tile, i: number) => any): any[] {
-    return this.#tiles.map(iterator);
+    return this._tiles.map(iterator);
   }
 
   register(...tiles: Tile[]): void {
-    this.#tiles.register(...tiles);
+    this._tiles.register(...tiles);
   }
 
   tiles(): Tile[] {
@@ -149,7 +149,7 @@ export class World extends DataObject implements IWorld {
   }
 
   width(): number {
-    return this.#width;
+    return this._width;
   }
 }
 
