@@ -85,5 +85,10 @@ class World extends DataObject_1.DataObject {
     }
 }
 exports.World = World;
+World.transient = [
+    '_generator',
+    '_landMassRegistry',
+    '_ruleRegistry',
+];
 exports.default = World;
 //# sourceMappingURL=World.js.map

@@ -43,6 +43,7 @@ export interface ITile extends IDataObject {
 }
 
 export class Tile extends DataObject implements ITile {
+  static readonly transient = ['_neighbours', '_ruleRegistry', '_yieldCache'];
   private _map: World;
   private _neighbours: Tile[] = [];
   private _ruleRegistry: RuleRegistry;

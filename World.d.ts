@@ -22,6 +22,7 @@ export interface IWorld extends IDataObject {
   width(): number;
 }
 export declare class World extends DataObject implements IWorld {
+  static readonly transient: string[];
   private _generator;
   private _height;
   private _landMassRegistry;

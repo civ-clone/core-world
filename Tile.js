@@ -135,5 +135,6 @@ class Tile extends DataObject_1.DataObject {
     }
 }
 exports.Tile = Tile;
+Tile.transient = ['_neighbours', '_ruleRegistry', '_yieldCache'];
 exports.default = Tile;
 //# sourceMappingURL=Tile.js.map

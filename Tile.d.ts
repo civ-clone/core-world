@@ -33,6 +33,7 @@ export interface ITile extends IDataObject {
   yields(player: Player | null): Yield[];
 }
 export declare class Tile extends DataObject implements ITile {
+  static readonly transient: string[];
   private _map;
   private _neighbours;
   private _ruleRegistry;

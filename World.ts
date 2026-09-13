@@ -33,6 +33,11 @@ export interface IWorld extends IDataObject {
 }
 
 export class World extends DataObject implements IWorld {
+  static readonly transient = [
+    '_generator',
+    '_landMassRegistry',
+    '_ruleRegistry',
+  ];
   private _generator: Generator;
   private _height: number;
   private _landMassRegistry: LandMassRegistry;
