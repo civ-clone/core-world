@@ -83,6 +83,28 @@ class World extends DataObject_1.DataObject {
     width() {
         return this._width;
     }
+    /**
+     * Put the registry back around the restored tiles.
+     *
+     * `_tiles` is an `EntityRegistry` held as a field, and `core-save-game`
+     * writes one as an array of its members: the class around a collection is
+     * the one thing the format cannot record. So a loaded world arrives with a
+     * plain `Tile[]` here, and `tiles()` — `this._tiles.entries()` — hands back
+     * an array iterator. Nothing fails at load; the first thing to notice is
+     * `Tileset.from` choking on pairs when something asks a tile for its
+     * surroundings, several turns into a game that was loaded successfully.
+     *
+     * The tiles themselves are saved entities and are restored before this runs,
+     * so only the container has to be rebuilt.
+     */
+    onHydrated() {
+        const tiles = this._tiles;
+        if (!Array.isArray(tiles)) {
+            return;
+        }
+        this._tiles = new EntityRegistry_1.default(Tile_1.default);
+        this._tiles.register(...tiles);
+    }
 }
 exports.World = World;
 World.transient = [

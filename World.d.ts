@@ -46,5 +46,20 @@ export declare class World extends DataObject implements IWorld {
   register(...tiles: Tile[]): void;
   tiles(): Tile[];
   width(): number;
+  /**
+   * Put the registry back around the restored tiles.
+   *
+   * `_tiles` is an `EntityRegistry` held as a field, and `core-save-game`
+   * writes one as an array of its members: the class around a collection is
+   * the one thing the format cannot record. So a loaded world arrives with a
+   * plain `Tile[]` here, and `tiles()` — `this._tiles.entries()` — hands back
+   * an array iterator. Nothing fails at load; the first thing to notice is
+   * `Tileset.from` choking on pairs when something asks a tile for its
+   * surroundings, several turns into a game that was loaded successfully.
+   *
+   * The tiles themselves are saved entities and are restored before this runs,
+   * so only the container has to be rebuilt.
+   */
+  onHydrated(): void;
 }
 export default World;
