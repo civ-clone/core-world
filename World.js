@@ -12,6 +12,22 @@ class World extends DataObject_1.DataObject {
     constructor(generator, ruleRegistry = RuleRegistry_1.instance, landMassRegistry = LandMassRegistry_1.instance) {
         super();
         this._tiles = new EntityRegistry_1.default(Tile_1.default);
+        /**
+         * The registry's tiles in registration order, for `get`.
+         *
+         * `EntityRegistry.entries()` hands back a defensive copy, which is right for
+         * a caller that might sort or splice what it gets and ruinous for a caller
+         * that wants one element: `get` copied all 2,400 tiles of a 60x40 world to
+         * index one of them, and `Tile.getNeighbour` calls it eight times per tile.
+         * Counting the copies over thirty turns found 204,552 calls moving **490
+         * million** tile references, 98.5% of all registry copying in the run.
+         *
+         * Rebuilt lazily and dropped whenever a tile is registered, which is the
+         * only way `_tiles` changes — nothing unregisters a tile from the world.
+         * Transient: a saved world carries its tiles, and `onHydrated` rebuilds the
+         * registry around them.
+         */
+        this._tileCache = null;
         this._generator = generator;
         this._height = generator.height();
         this._landMassRegistry = landMassRegistry;
@@ -23,7 +39,7 @@ class World extends DataObject_1.DataObject {
         const tiles = await this._generator.generate(), landTiles = [];
         tiles.forEach((terrain, i) => {
             const tile = new Tile_1.default(i % this._width, Math.floor(i / this._width), terrain, this, this._ruleRegistry);
-            this._tiles.register(tile);
+            this.register(tile);
             if (tile.isLand()) {
                 landTiles.push(tile);
             }
@@ -60,7 +76,16 @@ class World extends DataObject_1.DataObject {
         return this._tiles.forEach(iterator);
     }
     get(x, y) {
-        return this.entries()[this._generator.coordsToIndex(x, y)];
+        // Falsy rather than `=== null`: `Game.inject` is what puts a transient
+        // field back after a load, and one it has no entry for arrives as
+        // `undefined`. That is asserted against — `tests/engine/inject.ts` caught
+        // exactly this, before `_tileCache` was added to `Game.inject`'s caches —
+        // but the guard costs nothing and what it prevents is `undefined[index]`
+        // deep inside a loaded game.
+        if (!this._tileCache) {
+            this._tileCache = this._tiles.entries();
+        }
+        return this._tileCache[this._generator.coordsToIndex(x, y)];
     }
     height() {
         return this._height;
@@ -76,6 +101,7 @@ class World extends DataObject_1.DataObject {
     }
     register(...tiles) {
         this._tiles.register(...tiles);
+        this._tileCache = null;
     }
     tiles() {
         return this.entries();
@@ -103,7 +129,7 @@ class World extends DataObject_1.DataObject {
             return;
         }
         this._tiles = new EntityRegistry_1.default(Tile_1.default);
-        this._tiles.register(...tiles);
+        this.register(...tiles);
     }
 }
 exports.World = World;
@@ -111,6 +137,7 @@ World.transient = [
     '_generator',
     '_landMassRegistry',
     '_ruleRegistry',
+    '_tileCache',
 ];
 exports.default = World;
 //# sourceMappingURL=World.js.map

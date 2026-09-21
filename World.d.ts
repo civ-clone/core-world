@@ -25,6 +25,22 @@ export declare class World extends DataObject implements IWorld {
     private _landMassRegistry;
     private _ruleRegistry;
     private _tiles;
+    /**
+     * The registry's tiles in registration order, for `get`.
+     *
+     * `EntityRegistry.entries()` hands back a defensive copy, which is right for
+     * a caller that might sort or splice what it gets and ruinous for a caller
+     * that wants one element: `get` copied all 2,400 tiles of a 60x40 world to
+     * index one of them, and `Tile.getNeighbour` calls it eight times per tile.
+     * Counting the copies over thirty turns found 204,552 calls moving **490
+     * million** tile references, 98.5% of all registry copying in the run.
+     *
+     * Rebuilt lazily and dropped whenever a tile is registered, which is the
+     * only way `_tiles` changes — nothing unregisters a tile from the world.
+     * Transient: a saved world carries its tiles, and `onHydrated` rebuilds the
+     * registry around them.
+     */
+    private _tileCache;
     private _width;
     constructor(generator: Generator, ruleRegistry?: RuleRegistry, landMassRegistry?: LandMassRegistry);
     build(): Promise<World>;

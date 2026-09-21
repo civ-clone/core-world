@@ -37,12 +37,29 @@ export class World extends DataObject implements IWorld {
     '_generator',
     '_landMassRegistry',
     '_ruleRegistry',
+    '_tileCache',
   ];
   private _generator: Generator;
   private _height: number;
   private _landMassRegistry: LandMassRegistry;
   private _ruleRegistry: RuleRegistry;
   private _tiles: EntityRegistry<Tile> = new EntityRegistry(Tile);
+  /**
+   * The registry's tiles in registration order, for `get`.
+   *
+   * `EntityRegistry.entries()` hands back a defensive copy, which is right for
+   * a caller that might sort or splice what it gets and ruinous for a caller
+   * that wants one element: `get` copied all 2,400 tiles of a 60x40 world to
+   * index one of them, and `Tile.getNeighbour` calls it eight times per tile.
+   * Counting the copies over thirty turns found 204,552 calls moving **490
+   * million** tile references, 98.5% of all registry copying in the run.
+   *
+   * Rebuilt lazily and dropped whenever a tile is registered, which is the
+   * only way `_tiles` changes — nothing unregisters a tile from the world.
+   * Transient: a saved world carries its tiles, and `onHydrated` rebuilds the
+   * registry around them.
+   */
+  private _tileCache: Tile[] | null = null;
   private _width: number;
 
   constructor(
@@ -74,7 +91,7 @@ export class World extends DataObject implements IWorld {
         this._ruleRegistry
       );
 
-      this._tiles.register(tile);
+      this.register(tile);
 
       if (tile.isLand()) {
         landTiles.push(tile);
@@ -126,7 +143,17 @@ export class World extends DataObject implements IWorld {
   }
 
   get(x: number, y: number): Tile {
-    return this.entries()[this._generator.coordsToIndex(x, y)];
+    // Falsy rather than `=== null`: `Game.inject` is what puts a transient
+    // field back after a load, and one it has no entry for arrives as
+    // `undefined`. That is asserted against — `tests/engine/inject.ts` caught
+    // exactly this, before `_tileCache` was added to `Game.inject`'s caches —
+    // but the guard costs nothing and what it prevents is `undefined[index]`
+    // deep inside a loaded game.
+    if (!this._tileCache) {
+      this._tileCache = this._tiles.entries();
+    }
+
+    return this._tileCache[this._generator.coordsToIndex(x, y)];
   }
 
   height(): number {
@@ -147,6 +174,7 @@ export class World extends DataObject implements IWorld {
 
   register(...tiles: Tile[]): void {
     this._tiles.register(...tiles);
+    this._tileCache = null;
   }
 
   tiles(): Tile[] {
@@ -179,7 +207,7 @@ export class World extends DataObject implements IWorld {
     }
 
     this._tiles = new EntityRegistry(Tile);
-    this._tiles.register(...(tiles as Tile[]));
+    this.register(...(tiles as Tile[]));
   }
 }
 
