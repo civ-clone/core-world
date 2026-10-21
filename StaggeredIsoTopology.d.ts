@@ -100,6 +100,19 @@ export declare class StaggeredIsoTopology implements ITopology<StaggeredIsoDirec
      */
     offset(direction: StaggeredIsoDirection, x: number, y: number): Offset;
     /**
+     * King's moves in logical coordinates, `max(|Δa|, |Δb|)`, the short way
+     * round: every one of the eight neighbours is one square-grid step in
+     * (`a`, `b`), so this is `SquareTopology.steps` over the logical tiles.
+     *
+     * The shortest way round is picked in (`d`, `y`), for the reason `distance`
+     * gives. There `max(|Δa|, |Δb|)` is `max(|Δd + Δy|, |Δy - Δd|) / 2`, which is
+     * `(|Δd| + |Δy|) / 2`: a sum, which grows with both, so the shortest `Δd`
+     * and the shortest `Δy` give the fewest steps. `Δd` and `Δy` always have the
+     * same parity (a wrap moves `d` by `2 * width` and `y` by an even height),
+     * so the halving is exact. Nothing is allocated.
+     */
+    steps(x1: number, y1: number, x2: number, y2: number): number;
+    /**
      * Any whole width and height of at least one, and an even height if the
      * world is to wrap north to south.
      */

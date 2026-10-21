@@ -70,6 +70,11 @@ export declare class HexOddRTopology implements ITopology<HexDirection> {
      */
     offset(direction: HexDirection, x: number, y: number): Offset;
     /**
+     * The same as `distance`, which on a hexagonal grid is already the fewest
+     * steps between the two tiles.
+     */
+    steps(x1: number, y1: number, x2: number, y2: number): number;
+    /**
      * Any whole width and height of at least one, except an odd height when `y`
      * wraps: the rows either side of the seam would have the same parity, so
      * their diagonal neighbours would not line up.

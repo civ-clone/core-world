@@ -41,6 +41,18 @@ export interface ITopology<D extends string = string> {
      */
     offset(direction: D, x: number, y: number): readonly [number, number];
     /**
+     * The fewest moves from one tile to a neighbour, then that neighbour's
+     * neighbour and so on, that it takes to get from (`x1`, `y1`) to
+     * (`x2`, `y2`), the short way round any wrap: a whole number, `0` for the
+     * same tile and `1` for any neighbour.
+     *
+     * Unlike `distance`, this means the same thing on every grid. `distance` is
+     * the straight line on a square grid but a step count on a hexagonal one;
+     * anything that counts moves (how far a unit can get on the moves or fuel it
+     * has left) wants `steps`.
+     */
+    steps(x1: number, y1: number, x2: number, y2: number): number;
+    /**
      * Throw an `Error` naming the dimensions if this topology cannot make a
      * world of them, for example one it cannot wrap.
      */

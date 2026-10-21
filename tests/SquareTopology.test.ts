@@ -35,6 +35,83 @@ const box = (
   return pairs;
 };
 
+// The fewest moves from (x, y) to every tile, by breadth-first search over
+// `neighbour`.
+const breadthFirst = (
+  topology: SquareTopology,
+  width: number,
+  height: number,
+  x: number,
+  y: number
+): number[][] => {
+  const steps: number[][] = Array.from({ length: width }, () =>
+      new Array(height).fill(-1)
+    ),
+    queue: [number, number][] = [[x, y]];
+
+  steps[x][y] = 0;
+
+  while (queue.length) {
+    const [currentX, currentY] = queue.shift()!;
+
+    topology.directions().forEach((direction: SquareDirection): void => {
+      const [nextX, nextY] = topology.neighbour(currentX, currentY, direction);
+
+      if (steps[nextX][nextY] !== -1) {
+        return;
+      }
+
+      steps[nextX][nextY] = steps[currentX][currentY] + 1;
+      queue.push([nextX, nextY]);
+    });
+  }
+
+  return steps;
+};
+
+// The Chebyshev distance, `max(|dx|, |dy|)`, over every way two tiles can be
+// separated, going round the world up to twice in each direction.
+const chebyshev = (
+  width: number,
+  height: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): number => {
+  let shortest = Infinity;
+
+  for (let i = -2; i <= 2; i++) {
+    for (let j = -2; j <= 2; j++) {
+      shortest = Math.min(
+        shortest,
+        Math.max(Math.abs(x2 + i * width - x1), Math.abs(y2 + j * height - y1))
+      );
+    }
+  }
+
+  return shortest;
+};
+
+// simple-ai-client's `movesBetween` (`lib/movesBetween.ts`), which `steps` is
+// to replace, as it is written there but taking coordinates for tiles.
+const movesBetween = (
+  width: number,
+  height: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): number => {
+  const onAxis = (delta: number, size: number): number => {
+    const direct = Math.abs(delta);
+
+    return Math.min(direct, Math.abs(size - direct));
+  };
+
+  return Math.max(onAxis(x1 - x2, width), onAxis(y1 - y2, height));
+};
+
 describe('SquareTopology', (): void => {
   it('should list every direction, then the edge directions, in order', (): void => {
     const topology = new SquareTopology(10, 10);
@@ -166,6 +243,97 @@ describe('SquareTopology', (): void => {
     expect(topology.distance(0, 0, 0, 9)).to.equal(1);
     expect(topology.distance(0, 0, 9, 9)).to.equal(Math.hypot(1, 1));
     expect(topology.distance(0, 0, 8, 8)).to.equal(Math.hypot(2, 2));
+  });
+
+  it("should count king's moves the short way round, as a breadth-first search does", (): void => {
+    (
+      [
+        [10, 10],
+        [7, 5],
+        [5, 8],
+        [13, 11],
+        [1, 1],
+        [2, 3],
+        [1, 6],
+        [4, 1],
+      ] as [number, number][]
+    ).forEach(([width, height]): void => {
+      const topology = new SquareTopology(width, height);
+
+      for (let x1 = 0; x1 < width; x1++) {
+        for (let y1 = 0; y1 < height; y1++) {
+          const steps = breadthFirst(topology, width, height, x1, y1);
+
+          for (let x2 = 0; x2 < width; x2++) {
+            for (let y2 = 0; y2 < height; y2++) {
+              const label = `${width}x${height}: (${x1}, ${y1}) to (${x2}, ${y2})`;
+
+              expect(topology.steps(x1, y1, x2, y2), label).to.equal(
+                steps[x2][y2]
+              );
+              expect(topology.steps(x1, y1, x2, y2), label).to.equal(
+                chebyshev(width, height, x1, y1, x2, y2)
+              );
+              expect(topology.steps(x2, y2, x1, y1), label).to.equal(
+                topology.steps(x1, y1, x2, y2)
+              );
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it("should count the same moves as simple-ai-client's movesBetween, for every pair of tiles", (): void => {
+    (
+      [
+        [80, 50],
+        [40, 25],
+        [10, 10],
+        [7, 5],
+        [1, 1],
+      ] as [number, number][]
+    ).forEach(([width, height]): void => {
+      const topology = new SquareTopology(width, height),
+        differences: string[] = [];
+      let pairs = 0;
+
+      // Millions of pairs on the larger worlds, so collected rather than
+      // asserted one at a time.
+      for (let x1 = 0; x1 < width; x1++) {
+        for (let y1 = 0; y1 < height; y1++) {
+          for (let x2 = 0; x2 < width; x2++) {
+            for (let y2 = 0; y2 < height; y2++) {
+              pairs++;
+
+              if (
+                topology.steps(x1, y1, x2, y2) !==
+                movesBetween(width, height, x1, y1, x2, y2)
+              ) {
+                differences.push(`(${x1}, ${y1}) to (${x2}, ${y2})`);
+              }
+            }
+          }
+        }
+      }
+
+      expect(pairs).to.equal((width * height) ** 2);
+      expect(differences.slice(0, 10), `${width}x${height}`).to.eql([]);
+    });
+  });
+
+  it('should count steps, not the straight line, the short way round', (): void => {
+    const topology = new SquareTopology(10, 10);
+
+    expect(topology.steps(0, 0, 0, 0)).to.equal(0);
+    expect(topology.steps(0, 0, 4, 0)).to.equal(4);
+    expect(topology.steps(0, 0, 3, 3)).to.equal(3);
+    expect(topology.distance(0, 0, 3, 3)).to.equal(Math.hypot(3, 3));
+    expect(topology.steps(0, 0, 9, 0)).to.equal(1);
+    expect(topology.steps(0, 0, 9, 9)).to.equal(1);
+    expect(topology.steps(0, 0, 4, 7)).to.equal(4);
+    expect(topology.steps(0, 0, 5, 5)).to.equal(5);
+    expect(topology.steps(2, 8, 8, 2)).to.equal(4);
   });
 
   it('should wrap both axes', (): void => {

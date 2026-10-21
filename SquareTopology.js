@@ -150,6 +150,17 @@ class SquareTopology {
         }
         throw new Error(`SquareTopology: '${direction}' is not a direction.`);
     }
+    /**
+     * King's moves: diagonals count as one, so this is the larger of the two
+     * axes' gaps (the Chebyshev distance), each measured the short way round as
+     * `distance` measures it. The larger of two values grows with both, so, as
+     * there, the shortest of the nine ways round is the shortest horizontal
+     * paired with the shortest vertical, and nothing is allocated.
+     */
+    steps(x1, y1, x2, y2) {
+        const deltaX = shortestOnAxis(x1 - x2, this._width), deltaY = shortestOnAxis(y1 - y2, this._height);
+        return deltaX > deltaY ? deltaX : deltaY;
+    }
     /** Any whole width and height of at least one. */
     validate(width, height) {
         if (Number.isInteger(width) &&
