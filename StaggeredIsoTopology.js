@@ -170,6 +170,10 @@ class StaggeredIsoTopology {
     edgeDirections() {
         return edgeDirections;
     }
+    /** `'staggered-iso'`. */
+    id() {
+        return 'staggered-iso';
+    }
     /**
      * Wraps east to west always, and north to south when `wrapsY()`; `null` off
      * a top or bottom edge that does not.

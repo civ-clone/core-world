@@ -155,6 +155,10 @@ class HexOddRTopology {
     edgeDirections() {
         return directions;
     }
+    /** `'hex-odd-r'`. */
+    id() {
+        return 'hex-odd-r';
+    }
     /** `null` off the top or bottom when `y` does not wrap. */
     neighbour(x, y, direction) {
         const [dx, dy] = this.offset(direction, x, y), neighbourY = y + dy;

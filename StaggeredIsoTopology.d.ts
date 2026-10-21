@@ -88,6 +88,8 @@ export declare class StaggeredIsoTopology implements ITopology<StaggeredIsoDirec
     distance(x1: number, y1: number, x2: number, y2: number): number;
     /** `ne se sw nw`: the diagonals are the directions that share an edge. */
     edgeDirections(): readonly StaggeredIsoEdgeDirection[];
+    /** `'staggered-iso'`. */
+    id(): 'staggered-iso';
     /**
      * Wraps east to west always, and north to south when `wrapsY()`; `null` off
      * a top or bottom edge that does not.

@@ -204,6 +204,11 @@ export class HexOddRTopology implements ITopology<HexDirection> {
     return directions;
   }
 
+  /** `'hex-odd-r'`. */
+  id(): 'hex-odd-r' {
+    return 'hex-odd-r';
+  }
+
   /** `null` off the top or bottom when `y` does not wrap. */
   neighbour(
     x: number,

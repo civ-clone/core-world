@@ -119,6 +119,10 @@ class SquareTopology {
     edgeDirections() {
         return edgeDirections;
     }
+    /** `'square'`. */
+    id() {
+        return 'square';
+    }
     /** Never `null`: both axes wrap. */
     neighbour(x, y, direction) {
         const [dx, dy] = this.offset(direction, x, y);

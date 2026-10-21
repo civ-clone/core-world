@@ -224,6 +224,11 @@ export class StaggeredIsoTopology implements ITopology<StaggeredIsoDirection> {
     return edgeDirections;
   }
 
+  /** `'staggered-iso'`. */
+  id(): 'staggered-iso' {
+    return 'staggered-iso';
+  }
+
   /**
    * Wraps east to west always, and north to south when `wrapsY()`; `null` off
    * a top or bottom edge that does not.
