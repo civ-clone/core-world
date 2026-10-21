@@ -57,6 +57,8 @@ export declare class SquareTopology implements ITopology<SquareDirection> {
     distance(x1: number, y1: number, x2: number, y2: number): number;
     /** `n e s w`. */
     edgeDirections(): readonly SquareEdgeDirection[];
+    /** `'square'`. */
+    id(): 'square';
     /** Never `null`: both axes wrap. */
     neighbour(x: number, y: number, direction: SquareDirection): [number, number];
     /**

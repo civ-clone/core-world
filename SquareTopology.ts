@@ -154,6 +154,11 @@ export class SquareTopology implements ITopology<SquareDirection> {
     return edgeDirections;
   }
 
+  /** `'square'`. */
+  id(): 'square' {
+    return 'square';
+  }
+
   /** Never `null`: both axes wrap. */
   neighbour(
     x: number,

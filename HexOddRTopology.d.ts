@@ -62,6 +62,8 @@ export declare class HexOddRTopology implements ITopology<HexDirection> {
     distance(x1: number, y1: number, x2: number, y2: number): number;
     /** `ne e se sw w nw`: every neighbour of a hex shares an edge with it. */
     edgeDirections(): readonly HexDirection[];
+    /** `'hex-odd-r'`. */
+    id(): 'hex-odd-r';
     /** `null` off the top or bottom when `y` does not wrap. */
     neighbour(x: number, y: number, direction: HexDirection): [number, number] | null;
     /**

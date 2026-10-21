@@ -1,4 +1,14 @@
 /**
+ * The name of each kind of grid, which a `World` records in its save so that a
+ * loaded world is rebuilt on the grid it was made on. `createTopology` (in
+ * `topologies`) turns one back into a topology.
+ *
+ * These are written into saved games, so an id, once added, is never renamed
+ * or reused: add a new one instead.
+ */
+export type TopologyId = 'square' | 'staggered-iso' | 'hex-odd-r';
+
+/**
  * The shape of a world's grid: which tiles neighbour which, how far apart two
  * tiles are, and which tiles lie within a radius of one.
  *
@@ -28,6 +38,12 @@ export interface ITopology<D extends string = string> {
 
   /** The directions whose neighbour shares an edge, in a stable order. */
   edgeDirections(): readonly D[];
+
+  /**
+   * Which kind of grid this is: the id `createTopology` builds it from, and
+   * the one a `World` on it saves.
+   */
+  id(): TopologyId;
 
   /**
    * The storage coordinates of the neighbour in `direction`, wrapped into
