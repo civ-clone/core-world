@@ -62,7 +62,7 @@ export declare class Tile extends DataObject implements ITile {
     getSurroundingArea(radius?: number): Tileset;
     /**
      * The distance to `tile`, measured the short way round a wrapping world, as
-     * the world's topology measures it. `ITopology.distance` has the history.
+     * the world's topology measures it. `SquareTopology.distance` has the history.
      */
     distanceFrom(tile: Tile): number;
     isCoast(): boolean;
