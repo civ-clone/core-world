@@ -100,13 +100,35 @@ describe('World', (): void => {
     );
   });
 
-  it('should treat a generator topology without an id as square', async (): Promise<void> => {
-    const generator = generateGenerator(4, 4);
+  it('should treat a generator topology without an id as square only when its class is a `SquareTopology`', async (): Promise<void> => {
+    // A topology from a copy of `core-world` from before `id()`: its class is
+    // not this copy's, so only its name can be compared.
+    const fromOldCopy = (name: string): object => {
+        const Class = class {};
 
-    // A topology from a copy of `core-world` from before `id()`.
-    generator.topology = (): any => ({});
+        Object.defineProperty(Class, 'name', { value: name });
 
-    expect(new World(generator).topologyId()).to.equal('square');
+        return new Class();
+      },
+      worldOn = (topology: object): World => {
+        const generator = generateGenerator(4, 4);
+
+        generator.topology = (): any => topology;
+
+        return new World(generator);
+      };
+
+    expect(worldOn(fromOldCopy('SquareTopology')).topologyId()).to.equal(
+      'square'
+    );
+    expect((): unknown => worldOn(fromOldCopy('HexOddRTopology'))).to.throw(
+      Error,
+      "World: the generator's topology (HexOddRTopology) has no id(): the copy of core-world that core-world-generator uses predates topology ids"
+    );
+    expect((): unknown => worldOn({})).to.throw(
+      Error,
+      "World: the generator's topology (Object) has no id()"
+    );
   });
 
   it('should load a world saved without a topology id as square, and save it from then on', async (): Promise<void> => {

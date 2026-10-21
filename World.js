@@ -15,11 +15,24 @@ const topologies_1 = require("./topologies");
  * A generator's topology can come from another copy of this package than the
  * one `World` is loaded from: `core-world-generator` depends on `core-world`,
  * so a project whose two versions do not match has two copies, as this
- * package's own tests do. One from before `id()` was added has no id, and a
- * generator's topology from it is its default square grid: nothing gave a
- * generator any other before topology ids existed.
+ * package's own tests do. One from before `id()` was added has no id. Its
+ * class cannot be compared with this copy's, so it is recognised by name: a
+ * `SquareTopology` is a generator's default grid and is recorded as square.
+ * Any other grid from such a copy is refused rather than saved as the wrong
+ * one.
  */
-const topologyIdOf = (topology) => { var _a, _b, _c; return (_c = (_b = (_a = topology).id) === null || _b === void 0 ? void 0 : _b.call(_a)) !== null && _c !== void 0 ? _c : 'square'; };
+const topologyIdOf = (topology) => {
+    var _a;
+    const { id } = topology;
+    if (typeof id === 'function') {
+        return id.call(topology);
+    }
+    const name = (_a = topology.constructor) === null || _a === void 0 ? void 0 : _a.name;
+    if (name === 'SquareTopology') {
+        return 'square';
+    }
+    throw new Error(`World: the generator's topology (${name || 'unnamed'}) has no id(): the copy of core-world that core-world-generator uses predates topology ids, so which grid it is cannot be recorded.`);
+};
 class World extends DataObject_1.DataObject {
     constructor(generator, ruleRegistry = RuleRegistry_1.instance, landMassRegistry = LandMassRegistry_1.instance) {
         super();
