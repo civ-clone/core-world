@@ -4,8 +4,13 @@ import Terrain from '@civ-clone/core-terrain/Terrain';
 export class FillGenerator extends Generator {
   #TerrainType: typeof Terrain;
 
-  constructor(height: number, width: number, TerrainType: typeof Terrain) {
-    super(height, width);
+  constructor(
+    height: number,
+    width: number,
+    TerrainType: typeof Terrain,
+    options: { [key: string]: any } = {}
+  ) {
+    super(height, width, options);
 
     this.#TerrainType = TerrainType;
   }

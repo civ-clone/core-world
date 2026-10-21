@@ -15,8 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FillGenerator = void 0;
 const Generator_1 = require("@civ-clone/core-world-generator/Generator");
 class FillGenerator extends Generator_1.default {
-    constructor(height, width, TerrainType) {
-        super(height, width);
+    constructor(height, width, TerrainType, options = {}) {
+        super(height, width, options);
         _FillGenerator_TerrainType.set(this, void 0);
         __classPrivateFieldSet(this, _FillGenerator_TerrainType, TerrainType, "f");
     }
