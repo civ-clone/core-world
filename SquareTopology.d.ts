@@ -65,6 +65,14 @@ export declare class SquareTopology implements ITopology<SquareDirection> {
      * `x` and `y` are unused — every row of a square grid steps the same way.
      */
     offset(direction: SquareDirection, x: number, y: number): Offset;
+    /**
+     * King's moves: diagonals count as one, so this is the larger of the two
+     * axes' gaps (the Chebyshev distance), each measured the short way round as
+     * `distance` measures it. The larger of two values grows with both, so, as
+     * there, the shortest of the nine ways round is the shortest horizontal
+     * paired with the shortest vertical, and nothing is allocated.
+     */
+    steps(x1: number, y1: number, x2: number, y2: number): number;
     /** Any whole width and height of at least one. */
     validate(width: number, height: number): void;
     wrapsX(): boolean;

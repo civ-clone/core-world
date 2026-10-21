@@ -280,7 +280,7 @@ describe('HexOddRTopology', (): void => {
     });
   });
 
-  it('should measure the same steps as a breadth-first search', (): void => {
+  it('should measure and count the same steps as a breadth-first search', (): void => {
     [...worlds, [6, 6], [9, 8], [1, 2], [2, 2], [1, 1], [4, 1]].forEach(
       ([width, height]): void => {
         const topology = new HexOddRTopology(width, height);
@@ -289,10 +289,14 @@ describe('HexOddRTopology', (): void => {
           const steps = stepsFrom(topology, x1, y1);
 
           tiles(width, height).forEach(([x2, y2]): void => {
-            expect(
-              topology.distance(x1, y1, x2, y2),
-              `${width}x${height}: (${x1}, ${y1}) to (${x2}, ${y2})`
-            ).to.equal(steps.get(key(x2, y2)));
+            const label = `${width}x${height}: (${x1}, ${y1}) to (${x2}, ${y2})`;
+
+            expect(topology.distance(x1, y1, x2, y2), label).to.equal(
+              steps.get(key(x2, y2))
+            );
+            expect(topology.steps(x1, y1, x2, y2), label).to.equal(
+              steps.get(key(x2, y2))
+            );
           });
         });
       }
@@ -318,6 +322,28 @@ describe('HexOddRTopology', (): void => {
             topology.distance(x1, y1, x2, y2),
             `${width}x${height}: (${x1}, ${y1}) to (${x2}, ${y2})`
           ).to.equal(axialDistance(x1, y1, x2, y2, width, height, wrapY));
+        });
+      });
+    });
+  });
+
+  it('should count steps as it measures distance', (): void => {
+    (
+      [
+        [10, 10, true],
+        [9, 8, false],
+        [9, 7, false],
+        [4, 6, true],
+      ] as [number, number, boolean][]
+    ).forEach(([width, height, wrapY]): void => {
+      const topology = new HexOddRTopology(width, height, wrapY);
+
+      tiles(width, height).forEach(([x1, y1]): void => {
+        tiles(width, height).forEach(([x2, y2]): void => {
+          expect(
+            topology.steps(x1, y1, x2, y2),
+            `${width}x${height}: (${x1}, ${y1}) to (${x2}, ${y2})`
+          ).to.equal(topology.distance(x1, y1, x2, y2));
         });
       });
     });

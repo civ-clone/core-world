@@ -185,6 +185,13 @@ class HexOddRTopology {
         throw new Error(`HexOddRTopology: '${direction}' is not a direction.`);
     }
     /**
+     * The same as `distance`, which on a hexagonal grid is already the fewest
+     * steps between the two tiles.
+     */
+    steps(x1, y1, x2, y2) {
+        return this.distance(x1, y1, x2, y2);
+    }
+    /**
      * Any whole width and height of at least one, except an odd height when `y`
      * wraps: the rows either side of the seam would have the same parity, so
      * their diagonal neighbours would not line up.

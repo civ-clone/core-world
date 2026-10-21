@@ -316,6 +316,12 @@ describe('StaggeredIsoTopology', (): void => {
               // Each step is one square-grid step in (a, b), so the walk is
               // the Chebyshev distance there.
               expect(steps[x2][y2], label).to.equal(shortestChebyshev(deltas));
+              expect(topology.steps(x1, y1, x2, y2), label).to.equal(
+                steps[x2][y2]
+              );
+              expect(topology.steps(x2, y2, x1, y1), label).to.equal(
+                topology.steps(x1, y1, x2, y2)
+              );
               expect(topology.distance(x1, y1, x2, y2), label).to.equal(
                 shortestHypot(deltas)
               );
@@ -327,6 +333,59 @@ describe('StaggeredIsoTopology', (): void => {
         }
       }
     });
+  });
+
+  it('should count the same steps as a breadth-first search on the smallest worlds', (): void => {
+    (
+      [
+        [1, 1, false],
+        [1, 2, true],
+        [2, 2, true],
+        [2, 2, false],
+        [3, 2, true],
+        [2, 3, false],
+        [4, 1, false],
+      ] as [number, number, boolean][]
+    ).forEach(([width, height, wrapY]): void => {
+      const topology = new StaggeredIsoTopology(width, height, wrapY);
+
+      for (let x1 = 0; x1 < width; x1++) {
+        for (let y1 = 0; y1 < height; y1++) {
+          const steps = breadthFirst(topology, width, height, x1, y1);
+
+          for (let x2 = 0; x2 < width; x2++) {
+            for (let y2 = 0; y2 < height; y2++) {
+              expect(
+                topology.steps(x1, y1, x2, y2),
+                `${width}x${height}: (${x1}, ${y1}) to (${x2}, ${y2})`
+              ).to.equal(steps[x2][y2]);
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it('should count steps, not the straight line, the short way round', (): void => {
+    const topology = new StaggeredIsoTopology(10, 10),
+      flat = new StaggeredIsoTopology(10, 9);
+
+    expect(topology.steps(5, 5, 5, 5)).to.equal(0);
+    // One step to every neighbour, along an edge or across a corner.
+    topology.directions().forEach((direction): void => {
+      const [x, y] = topology.neighbour(5, 5, direction)!;
+
+      expect(topology.steps(5, 5, x, y), direction).to.equal(1);
+    });
+    // Three steps east is three `e` neighbours: 3 in logical `a` and `b`.
+    expect(topology.steps(2, 4, 5, 4)).to.equal(3);
+    expect(topology.distance(2, 4, 5, 4)).to.equal(Math.hypot(3, 3));
+    // Round the east-west seam, and over the north-south one.
+    expect(topology.steps(0, 4, 9, 4)).to.equal(1);
+    expect(topology.steps(5, 0, 5, 8)).to.equal(1);
+    expect(topology.steps(5, 1, 5, 9)).to.equal(1);
+    // Not over a seam that does not wrap.
+    expect(flat.steps(5, 0, 5, 8)).to.equal(4);
   });
 
   it('should satisfy the triangle inequality', (): void => {
@@ -391,6 +450,9 @@ describe('StaggeredIsoTopology', (): void => {
 
         expect(topology.distance(x, y, other[0], other[1])).to.equal(
           square.distance(a, b, otherA, otherB)
+        );
+        expect(topology.steps(x, y, other[0], other[1])).to.equal(
+          square.steps(a, b, otherA, otherB)
         );
       });
     });
