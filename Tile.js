@@ -58,7 +58,7 @@ class Tile extends DataObject_1.DataObject {
     }
     /**
      * The distance to `tile`, measured the short way round a wrapping world, as
-     * the world's topology measures it. `ITopology.distance` has the history.
+     * the world's topology measures it. `SquareTopology.distance` has the history.
      */
     distanceFrom(tile) {
         return this._map.topology().distance(this._x, this._y, tile.x(), tile.y());
