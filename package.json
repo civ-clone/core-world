@@ -11,8 +11,8 @@
   "private": false,
   "scripts": {
     "build": "npm run ts:compile && npm run prettier:format",
-    "prettier:check": "prettier --config .prettierrc '**/*.ts'",
-    "prettier:format": "prettier --config .prettierrc '**/*.ts' --write",
+    "prettier:check": "prettier --config .prettierrc --check '**/!(*.d).ts'",
+    "prettier:format": "prettier --config .prettierrc '**/!(*.d).ts' --write",
     "test": "ts-mocha ./tests/*.test.ts",
     "test:coverage": "c8 --all -x '**/*.ts' -x 'index.*' -x 'register*.*' ts-mocha ./tests/*.test.ts",
     "ts:compile": "tsc --build tsconfig.json"
