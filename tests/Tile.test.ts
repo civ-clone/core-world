@@ -182,6 +182,24 @@ describe('Tile', (): void => {
     expect(tile.isNeighbourOf(world.get(80, 50))).to.false;
   });
 
+  it('should return a new array of directions each call', async (): Promise<void> => {
+    const world = await generateWorld(),
+      tile = world.get(0, 0),
+      directions = tile.getNeighbouringDirections(),
+      adjacentDirections = tile.getAdjacentDirections();
+
+    expect(tile.getNeighbouringDirections()).not.equal(directions);
+    expect(tile.getNeighbouringDirections()).eql(directions);
+    expect(tile.getAdjacentDirections()).not.equal(adjacentDirections);
+    expect(tile.getAdjacentDirections()).eql(adjacentDirections);
+
+    directions.reverse();
+    adjacentDirections.reverse();
+
+    expect(tile.getNeighbouringDirections()[0]).to.equal('n');
+    expect(tile.getAdjacentDirections()[0]).to.equal('n');
+  });
+
   it('should correctly identify coastal tiles', async (): Promise<void> => {
     const world = await generateWorld(generateGenerator(10, 10, Land)),
       tile = world.get(0, 0);

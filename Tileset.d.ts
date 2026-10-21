@@ -11,6 +11,10 @@ export interface ITileset extends IEntityRegistry<Tile> {
 }
 export declare class Tileset extends EntityRegistry implements ITileset {
     static from(...tiles: Tile[]): Tileset;
+    /**
+     * The tiles within `radius` of `tile`, in the order the world's topology
+     * documents for `area` — for the square grid, the x-major box.
+     */
     static fromSurrounding(tile: Tile, radius?: number): Tileset;
     constructor(...tiles: Tile[]);
     push(...tiles: Tile[]): void;

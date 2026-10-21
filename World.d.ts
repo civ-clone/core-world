@@ -3,6 +3,7 @@ import { LandMassRegistry } from './LandMassRegistry';
 import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
 import Generator from '@civ-clone/core-world-generator/Generator';
 import { IRegistryIterator } from '@civ-clone/core-registry/Registry';
+import { ITopology } from './Topology';
 import Tile from './Tile';
 import LandMass from './LandMass';
 export interface IWorld extends IDataObject {
@@ -16,6 +17,7 @@ export interface IWorld extends IDataObject {
     map(iterator: (item: Tile, i: number) => any): any[];
     register(...tiles: Tile[]): void;
     tiles(): Tile[];
+    topology(): ITopology;
     width(): number;
 }
 export declare class World extends DataObject implements IWorld {
@@ -41,6 +43,16 @@ export declare class World extends DataObject implements IWorld {
      * registry around them.
      */
     private _tileCache;
+    /**
+     * The shape of the grid: neighbours, distance and surrounding areas, which
+     * `Tile` and `Tileset` ask for rather than working out themselves.
+     *
+     * Built lazily from the dimensions, so it is configuration rather than
+     * state and is not saved — a loaded world rebuilds it on first use. Every
+     * world is square for now; recording which topology a world uses in its
+     * save is web-renderer#89.
+     */
+    private _topology;
     private _width;
     constructor(generator: Generator, ruleRegistry?: RuleRegistry, landMassRegistry?: LandMassRegistry);
     build(): Promise<World>;
@@ -54,6 +66,7 @@ export declare class World extends DataObject implements IWorld {
     map(iterator: (item: Tile, i: number) => any): any[];
     register(...tiles: Tile[]): void;
     tiles(): Tile[];
+    topology(): ITopology;
     width(): number;
     /**
      * Put the registry back around the restored tiles.
@@ -68,6 +81,11 @@ export declare class World extends DataObject implements IWorld {
      *
      * The tiles themselves are saved entities and are restored before this runs,
      * so only the container has to be rebuilt.
+     *
+     * `_topology` is reset here as well. It is transient, and `Game.inject`
+     * fails a load that leaves a transient field `undefined`; it has no entry
+     * for this one, and needs none, because `topology()` rebuilds it from the
+     * restored dimensions on first use. A hook runs before that check.
      */
     onHydrated(): void;
 }
