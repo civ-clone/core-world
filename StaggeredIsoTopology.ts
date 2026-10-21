@@ -27,7 +27,7 @@ const directions: readonly StaggeredIsoDirection[] = Object.freeze([
     'nw',
   ] as StaggeredIsoEdgeDirection[]),
   offset = (dx: number, dy: number): Offset =>
-    Object.freeze([dx, dy] as [number, number]),
+    Object.freeze<[number, number]>([dx, dy]),
   // The four corner neighbours step the same way from every row.
   north = offset(0, -2),
   east = offset(1, 0),

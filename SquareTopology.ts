@@ -22,7 +22,7 @@ const directions: readonly SquareDirection[] = Object.freeze([
     'w',
   ] as SquareEdgeDirection[]),
   offset = (dx: number, dy: number): Offset =>
-    Object.freeze([dx, dy] as [number, number]),
+    Object.freeze<[number, number]>([dx, dy]),
   north = offset(0, -1),
   northEast = offset(1, -1),
   east = offset(1, 0),
