@@ -7,17 +7,16 @@ class Tileset extends EntityRegistry_1.EntityRegistry {
     static from(...tiles) {
         return new this(...tiles);
     }
+    /**
+     * The tiles within `radius` of `tile`, in the order the world's topology
+     * documents for `area` — for the square grid, the x-major box.
+     */
     static fromSurrounding(tile, radius = 2) {
-        const gen = (radius) => {
-            const pairs = [];
-            for (let x = tile.x() - radius; x <= tile.x() + radius; x++) {
-                for (let y = tile.y() - radius; y <= tile.y() + radius; y++) {
-                    pairs.push([x, y]);
-                }
-            }
-            return pairs;
-        };
-        return this.from(...gen(radius).map(([x, y]) => tile.map().get(x, y)));
+        const map = tile.map();
+        return this.from(...map
+            .topology()
+            .area(tile.x(), tile.y(), radius)
+            .map(([x, y]) => map.get(x, y)));
     }
     constructor(...tiles) {
         super(Tile_1.Tile);

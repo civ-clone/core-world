@@ -19,23 +19,18 @@ export class Tileset extends EntityRegistry implements ITileset {
     return new this(...tiles);
   }
 
+  /**
+   * The tiles within `radius` of `tile`, in the order the world's topology
+   * documents for `area` — for the square grid, the x-major box.
+   */
   static fromSurrounding(tile: Tile, radius: number = 2): Tileset {
-    const gen = (radius: number): [number, number][] => {
-      const pairs: [number, number][] = [];
-
-      for (let x: number = tile.x() - radius; x <= tile.x() + radius; x++) {
-        for (let y: number = tile.y() - radius; y <= tile.y() + radius; y++) {
-          pairs.push([x, y]);
-        }
-      }
-
-      return pairs;
-    };
+    const map = tile.map();
 
     return this.from(
-      ...gen(radius).map(
-        ([x, y]: [number, number]): Tile => tile.map().get(x, y)
-      )
+      ...map
+        .topology()
+        .area(tile.x(), tile.y(), radius)
+        .map(([x, y]: [number, number]): Tile => map.get(x, y))
     );
   }
 

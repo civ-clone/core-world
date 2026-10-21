@@ -6,6 +6,7 @@ const LandMassRegistry_1 = require("./LandMassRegistry");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const Built_1 = require("./Rules/Built");
 const EntityRegistry_1 = require("@civ-clone/core-registry/EntityRegistry");
+const SquareTopology_1 = require("./SquareTopology");
 const Tile_1 = require("./Tile");
 const LandMass_1 = require("./LandMass");
 class World extends DataObject_1.DataObject {
@@ -28,6 +29,16 @@ class World extends DataObject_1.DataObject {
          * registry around them.
          */
         this._tileCache = null;
+        /**
+         * The shape of the grid: neighbours, distance and surrounding areas, which
+         * `Tile` and `Tileset` ask for rather than working out themselves.
+         *
+         * Built lazily from the dimensions, so it is configuration rather than
+         * state and is not saved — a loaded world rebuilds it on first use. Every
+         * world is square for now; recording which topology a world uses in its
+         * save is web-renderer#89.
+         */
+        this._topology = null;
         this._generator = generator;
         this._height = generator.height();
         this._landMassRegistry = landMassRegistry;
@@ -106,6 +117,15 @@ class World extends DataObject_1.DataObject {
     tiles() {
         return this.entries();
     }
+    topology() {
+        // Falsy rather than `=== null`, for the reason given in `get`.
+        if (!this._topology) {
+            const topology = new SquareTopology_1.default(this._width, this._height);
+            topology.validate(this._width, this._height);
+            this._topology = topology;
+        }
+        return this._topology;
+    }
     width() {
         return this._width;
     }
@@ -122,9 +142,15 @@ class World extends DataObject_1.DataObject {
      *
      * The tiles themselves are saved entities and are restored before this runs,
      * so only the container has to be rebuilt.
+     *
+     * `_topology` is reset here as well. It is transient, and `Game.inject`
+     * fails a load that leaves a transient field `undefined`; it has no entry
+     * for this one, and needs none, because `topology()` rebuilds it from the
+     * restored dimensions on first use. A hook runs before that check.
      */
     onHydrated() {
         const tiles = this._tiles;
+        this._topology = null;
         if (!Array.isArray(tiles)) {
             return;
         }
@@ -138,6 +164,7 @@ World.transient = [
     '_landMassRegistry',
     '_ruleRegistry',
     '_tileCache',
+    '_topology',
 ];
 exports.default = World;
 //# sourceMappingURL=World.js.map

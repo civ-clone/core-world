@@ -14,6 +14,8 @@ import Built from './Rules/Built';
 import EntityRegistry from '@civ-clone/core-registry/EntityRegistry';
 import Generator from '@civ-clone/core-world-generator/Generator';
 import { IRegistryIterator } from '@civ-clone/core-registry/Registry';
+import { ITopology } from './Topology';
+import SquareTopology from './SquareTopology';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tile from './Tile';
 import LandMass from './LandMass';
@@ -29,6 +31,7 @@ export interface IWorld extends IDataObject {
   map(iterator: (item: Tile, i: number) => any): any[];
   register(...tiles: Tile[]): void;
   tiles(): Tile[];
+  topology(): ITopology;
   width(): number;
 }
 
@@ -38,6 +41,7 @@ export class World extends DataObject implements IWorld {
     '_landMassRegistry',
     '_ruleRegistry',
     '_tileCache',
+    '_topology',
   ];
   private _generator: Generator;
   private _height: number;
@@ -60,6 +64,16 @@ export class World extends DataObject implements IWorld {
    * registry around them.
    */
   private _tileCache: Tile[] | null = null;
+  /**
+   * The shape of the grid: neighbours, distance and surrounding areas, which
+   * `Tile` and `Tileset` ask for rather than working out themselves.
+   *
+   * Built lazily from the dimensions, so it is configuration rather than
+   * state and is not saved — a loaded world rebuilds it on first use. Every
+   * world is square for now; recording which topology a world uses in its
+   * save is web-renderer#89.
+   */
+  private _topology: ITopology | null = null;
   private _width: number;
 
   constructor(
@@ -181,6 +195,19 @@ export class World extends DataObject implements IWorld {
     return this.entries();
   }
 
+  topology(): ITopology {
+    // Falsy rather than `=== null`, for the reason given in `get`.
+    if (!this._topology) {
+      const topology = new SquareTopology(this._width, this._height);
+
+      topology.validate(this._width, this._height);
+
+      this._topology = topology;
+    }
+
+    return this._topology;
+  }
+
   width(): number {
     return this._width;
   }
@@ -198,9 +225,16 @@ export class World extends DataObject implements IWorld {
    *
    * The tiles themselves are saved entities and are restored before this runs,
    * so only the container has to be rebuilt.
+   *
+   * `_topology` is reset here as well. It is transient, and `Game.inject`
+   * fails a load that leaves a transient field `undefined`; it has no entry
+   * for this one, and needs none, because `topology()` rebuilds it from the
+   * restored dimensions on first use. A hook runs before that check.
    */
   onHydrated(): void {
     const tiles = this._tiles as unknown;
+
+    this._topology = null;
 
     if (!Array.isArray(tiles)) {
       return;

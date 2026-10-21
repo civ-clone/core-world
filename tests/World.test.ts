@@ -4,6 +4,7 @@ import Built from '../Rules/Built';
 import Effect from '@civ-clone/core-rule/Effect';
 import Generator from '@civ-clone/core-world-generator/Generator';
 import RuleRegistry from '@civ-clone/core-rule/RuleRegistry';
+import SquareTopology from '../SquareTopology';
 import World from '../World';
 import WrappingFixedWorldGenerator from './lib/WrappingFixedWorldGenerator';
 import * as chai from 'chai';
@@ -29,6 +30,22 @@ describe('World', (): void => {
     expect(world.get(9, 9).y()).to.equal(9);
     expect(world.get(5, 4).x()).to.equal(5);
     expect(world.get(5, 4).y()).to.equal(4);
+  });
+
+  it('should own one square topology, rebuilt after hydration', async (): Promise<void> => {
+    const world = await generateWorld(generateGenerator(5, 7)),
+      topology = world.topology();
+
+    expect(topology).instanceof(SquareTopology);
+    expect(world.topology()).equal(topology);
+    expect(topology.distance(0, 0, 6, 0)).to.equal(1);
+    expect(topology.distance(0, 0, 0, 4)).to.equal(1);
+    expect(World.transient).to.include('_topology');
+
+    world.onHydrated();
+
+    expect(world.topology()).not.equal(topology);
+    expect(world.topology()).instanceof(SquareTopology);
   });
 
   it('should process `Built` `Rule`s when built', async (): Promise<void> => {
