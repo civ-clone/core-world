@@ -14,11 +14,11 @@ import Built from './Rules/Built';
 import EntityRegistry from '@civ-clone/core-registry/EntityRegistry';
 import Generator from '@civ-clone/core-world-generator/Generator';
 import { IRegistryIterator } from '@civ-clone/core-registry/Registry';
-import { ITopology } from './Topology';
-import SquareTopology from './SquareTopology';
+import { ITopology, TopologyId } from './Topology';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import Tile from './Tile';
 import LandMass from './LandMass';
+import createTopology from './topologies';
 
 export interface IWorld extends IDataObject {
   build(): Promise<World>;
@@ -32,8 +32,22 @@ export interface IWorld extends IDataObject {
   register(...tiles: Tile[]): void;
   tiles(): Tile[];
   topology(): ITopology;
+  topologyId(): TopologyId;
   width(): number;
 }
+
+/**
+ * The id of the grid `topology` is on.
+ *
+ * A generator's topology can come from another copy of this package than the
+ * one `World` is loaded from: `core-world-generator` depends on `core-world`,
+ * so a project whose two versions do not match has two copies, as this
+ * package's own tests do. One from before `id()` was added has no id, and a
+ * generator's topology from it is its default square grid: nothing gave a
+ * generator any other before topology ids existed.
+ */
+const topologyIdOf = (topology: object): TopologyId =>
+  (topology as Partial<Pick<ITopology, 'id'>>).id?.() ?? 'square';
 
 export class World extends DataObject implements IWorld {
   static readonly transient = [
@@ -68,12 +82,18 @@ export class World extends DataObject implements IWorld {
    * The shape of the grid: neighbours, distance and surrounding areas, which
    * `Tile` and `Tileset` ask for rather than working out themselves.
    *
-   * Built lazily from the dimensions, so it is configuration rather than
-   * state and is not saved — a loaded world rebuilds it on first use. Every
-   * world is square for now; recording which topology a world uses in its
-   * save is web-renderer#89.
+   * Built lazily from `_topologyId` and the dimensions, so it is configuration
+   * rather than state and is not saved — a loaded world rebuilds it on first
+   * use.
    */
   private _topology: ITopology | null = null;
+  /**
+   * Which grid the world is on, taken from its generator: saved, unlike
+   * `_topology`, so that a loaded world is rebuilt on the same grid. A world
+   * saved before this was recorded has none, and `onHydrated` makes it square,
+   * the only grid there was.
+   */
+  private _topologyId: TopologyId;
   private _width: number;
 
   constructor(
@@ -88,6 +108,7 @@ export class World extends DataObject implements IWorld {
     this._landMassRegistry = landMassRegistry;
     this._width = generator.width();
     this._ruleRegistry = ruleRegistry;
+    this._topologyId = topologyIdOf(generator.topology());
 
     this.addKey('height', 'tiles', 'width');
   }
@@ -198,14 +219,20 @@ export class World extends DataObject implements IWorld {
   topology(): ITopology {
     // Falsy rather than `=== null`, for the reason given in `get`.
     if (!this._topology) {
-      const topology = new SquareTopology(this._width, this._height);
-
-      topology.validate(this._width, this._height);
-
-      this._topology = topology;
+      // `createTopology` validates the dimensions, and throws for an id it
+      // does not know.
+      this._topology = createTopology(
+        this._topologyId,
+        this._width,
+        this._height
+      );
     }
 
     return this._topology;
+  }
+
+  topologyId(): TopologyId {
+    return this._topologyId;
   }
 
   width(): number {
@@ -229,12 +256,20 @@ export class World extends DataObject implements IWorld {
    * `_topology` is reset here as well. It is transient, and `Game.inject`
    * fails a load that leaves a transient field `undefined`; it has no entry
    * for this one, and needs none, because `topology()` rebuilds it from the
-   * restored dimensions on first use. A hook runs before that check.
+   * restored id and dimensions on first use. A hook runs before that check.
+   *
+   * A world saved before its topology id was recorded arrives without one.
+   * Every world was square then, so it is given `'square'` here, and the next
+   * save records it.
    */
   onHydrated(): void {
     const tiles = this._tiles as unknown;
 
     this._topology = null;
+
+    if (this._topologyId === undefined) {
+      this._topologyId = 'square';
+    }
 
     if (!Array.isArray(tiles)) {
       return;

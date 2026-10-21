@@ -6,9 +6,20 @@ const LandMassRegistry_1 = require("./LandMassRegistry");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const Built_1 = require("./Rules/Built");
 const EntityRegistry_1 = require("@civ-clone/core-registry/EntityRegistry");
-const SquareTopology_1 = require("./SquareTopology");
 const Tile_1 = require("./Tile");
 const LandMass_1 = require("./LandMass");
+const topologies_1 = require("./topologies");
+/**
+ * The id of the grid `topology` is on.
+ *
+ * A generator's topology can come from another copy of this package than the
+ * one `World` is loaded from: `core-world-generator` depends on `core-world`,
+ * so a project whose two versions do not match has two copies, as this
+ * package's own tests do. One from before `id()` was added has no id, and a
+ * generator's topology from it is its default square grid: nothing gave a
+ * generator any other before topology ids existed.
+ */
+const topologyIdOf = (topology) => { var _a, _b, _c; return (_c = (_b = (_a = topology).id) === null || _b === void 0 ? void 0 : _b.call(_a)) !== null && _c !== void 0 ? _c : 'square'; };
 class World extends DataObject_1.DataObject {
     constructor(generator, ruleRegistry = RuleRegistry_1.instance, landMassRegistry = LandMassRegistry_1.instance) {
         super();
@@ -33,10 +44,9 @@ class World extends DataObject_1.DataObject {
          * The shape of the grid: neighbours, distance and surrounding areas, which
          * `Tile` and `Tileset` ask for rather than working out themselves.
          *
-         * Built lazily from the dimensions, so it is configuration rather than
-         * state and is not saved — a loaded world rebuilds it on first use. Every
-         * world is square for now; recording which topology a world uses in its
-         * save is web-renderer#89.
+         * Built lazily from `_topologyId` and the dimensions, so it is configuration
+         * rather than state and is not saved — a loaded world rebuilds it on first
+         * use.
          */
         this._topology = null;
         this._generator = generator;
@@ -44,6 +54,7 @@ class World extends DataObject_1.DataObject {
         this._landMassRegistry = landMassRegistry;
         this._width = generator.width();
         this._ruleRegistry = ruleRegistry;
+        this._topologyId = topologyIdOf(generator.topology());
         this.addKey('height', 'tiles', 'width');
     }
     async build() {
@@ -120,11 +131,14 @@ class World extends DataObject_1.DataObject {
     topology() {
         // Falsy rather than `=== null`, for the reason given in `get`.
         if (!this._topology) {
-            const topology = new SquareTopology_1.default(this._width, this._height);
-            topology.validate(this._width, this._height);
-            this._topology = topology;
+            // `createTopology` validates the dimensions, and throws for an id it
+            // does not know.
+            this._topology = (0, topologies_1.default)(this._topologyId, this._width, this._height);
         }
         return this._topology;
+    }
+    topologyId() {
+        return this._topologyId;
     }
     width() {
         return this._width;
@@ -146,11 +160,18 @@ class World extends DataObject_1.DataObject {
      * `_topology` is reset here as well. It is transient, and `Game.inject`
      * fails a load that leaves a transient field `undefined`; it has no entry
      * for this one, and needs none, because `topology()` rebuilds it from the
-     * restored dimensions on first use. A hook runs before that check.
+     * restored id and dimensions on first use. A hook runs before that check.
+     *
+     * A world saved before its topology id was recorded arrives without one.
+     * Every world was square then, so it is given `'square'` here, and the next
+     * save records it.
      */
     onHydrated() {
         const tiles = this._tiles;
         this._topology = null;
+        if (this._topologyId === undefined) {
+            this._topologyId = 'square';
+        }
         if (!Array.isArray(tiles)) {
             return;
         }

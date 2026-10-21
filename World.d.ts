@@ -3,7 +3,7 @@ import { LandMassRegistry } from './LandMassRegistry';
 import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
 import Generator from '@civ-clone/core-world-generator/Generator';
 import { IRegistryIterator } from '@civ-clone/core-registry/Registry';
-import { ITopology } from './Topology';
+import { ITopology, TopologyId } from './Topology';
 import Tile from './Tile';
 import LandMass from './LandMass';
 export interface IWorld extends IDataObject {
@@ -18,6 +18,7 @@ export interface IWorld extends IDataObject {
     register(...tiles: Tile[]): void;
     tiles(): Tile[];
     topology(): ITopology;
+    topologyId(): TopologyId;
     width(): number;
 }
 export declare class World extends DataObject implements IWorld {
@@ -47,12 +48,18 @@ export declare class World extends DataObject implements IWorld {
      * The shape of the grid: neighbours, distance and surrounding areas, which
      * `Tile` and `Tileset` ask for rather than working out themselves.
      *
-     * Built lazily from the dimensions, so it is configuration rather than
-     * state and is not saved — a loaded world rebuilds it on first use. Every
-     * world is square for now; recording which topology a world uses in its
-     * save is web-renderer#89.
+     * Built lazily from `_topologyId` and the dimensions, so it is configuration
+     * rather than state and is not saved — a loaded world rebuilds it on first
+     * use.
      */
     private _topology;
+    /**
+     * Which grid the world is on, taken from its generator: saved, unlike
+     * `_topology`, so that a loaded world is rebuilt on the same grid. A world
+     * saved before this was recorded has none, and `onHydrated` makes it square,
+     * the only grid there was.
+     */
+    private _topologyId;
     private _width;
     constructor(generator: Generator, ruleRegistry?: RuleRegistry, landMassRegistry?: LandMassRegistry);
     build(): Promise<World>;
@@ -67,6 +74,7 @@ export declare class World extends DataObject implements IWorld {
     register(...tiles: Tile[]): void;
     tiles(): Tile[];
     topology(): ITopology;
+    topologyId(): TopologyId;
     width(): number;
     /**
      * Put the registry back around the restored tiles.
@@ -85,7 +93,11 @@ export declare class World extends DataObject implements IWorld {
      * `_topology` is reset here as well. It is transient, and `Game.inject`
      * fails a load that leaves a transient field `undefined`; it has no entry
      * for this one, and needs none, because `topology()` rebuilds it from the
-     * restored dimensions on first use. A hook runs before that check.
+     * restored id and dimensions on first use. A hook runs before that check.
+     *
+     * A world saved before its topology id was recorded arrives without one.
+     * Every world was square then, so it is given `'square'` here, and the next
+     * save records it.
      */
     onHydrated(): void;
 }
