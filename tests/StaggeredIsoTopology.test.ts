@@ -510,7 +510,14 @@ describe('StaggeredIsoTopology', (): void => {
     expect(new StaggeredIsoTopology(7, 5).wrapsX()).to.true;
     expect(new StaggeredIsoTopology(7, 5).wrapsY()).to.false;
     expect(new StaggeredIsoTopology(10, 10, false).wrapsY()).to.false;
-    expect(new StaggeredIsoTopology(7, 5, true).wrapsY()).to.true;
+    expect(new StaggeredIsoTopology(7, 6, true).wrapsY()).to.true;
+  });
+
+  it('should refuse to be built for dimensions it cannot make', (): void => {
+    expect(() => new StaggeredIsoTopology(7, 5, true)).to.throw('7x5');
+    expect(() => new StaggeredIsoTopology(0, 6)).to.throw('0x6');
+    expect(() => new StaggeredIsoTopology(7, 5)).not.to.throw();
+    expect(() => new StaggeredIsoTopology(7, 6)).not.to.throw();
   });
 
   it('should validate the dimensions it can make', (): void => {

@@ -125,6 +125,11 @@ export class StaggeredIsoTopology implements ITopology<StaggeredIsoDirection> {
     this._height = height;
     this._width = width;
     this._wrapY = wrapY;
+
+    // An odd height asked to wrap north to south has no consistent geometry
+    // (row parity cannot line up across the seam), so refuse to exist rather
+    // than rely on every caller remembering `validate`.
+    this.validate(width, height);
   }
 
   /**
