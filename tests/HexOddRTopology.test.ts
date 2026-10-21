@@ -526,6 +526,13 @@ describe('HexOddRTopology', (): void => {
     expect(new HexOddRTopology(10, 10, true).wrapsY()).to.true;
   });
 
+  it('should refuse to be built for dimensions it cannot make', (): void => {
+    expect(() => new HexOddRTopology(7, 5, true)).to.throw('7x5');
+    expect(() => new HexOddRTopology(0, 6)).to.throw('0x6');
+    expect(() => new HexOddRTopology(7, 5)).not.to.throw();
+    expect(() => new HexOddRTopology(7, 6)).not.to.throw();
+  });
+
   it('should validate the dimensions it can make', (): void => {
     const wrapping = new HexOddRTopology(1, 2, true),
       flat = new HexOddRTopology(1, 1, false);
