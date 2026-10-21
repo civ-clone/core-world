@@ -13,7 +13,7 @@ const directions: readonly HexDirection[] = Object.freeze([
     'nw',
   ] as HexDirection[]),
   offset = (dx: number, dy: number): Offset =>
-    Object.freeze([dx, dy] as [number, number]),
+    Object.freeze<[number, number]>([dx, dy]),
   east = offset(1, 0),
   west = offset(-1, 0),
   // An even row sits half a hex to the left of the odd rows either side of it,
