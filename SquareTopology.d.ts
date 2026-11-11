@@ -59,6 +59,11 @@ export declare class SquareTopology implements ITopology<SquareDirection> {
     edgeDirections(): readonly SquareEdgeDirection[];
     /** `'square'`. */
     id(): 'square';
+    /**
+     * `x` and `y` are already the logical axes: each the shortest signed gap on
+     * its own axis, as `distance` takes them.
+     */
+    logicalDelta(x1: number, y1: number, x2: number, y2: number): [number, number];
     /** Never `null`: both axes wrap. */
     neighbour(x: number, y: number, direction: SquareDirection): [number, number];
     /**

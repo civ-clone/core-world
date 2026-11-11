@@ -50,6 +50,19 @@ const shortestOnAxis = (delta, size) => {
             : over;
 };
 /**
+ * The shortest of `delta`, `delta - size` and `delta + size`, with its sign:
+ * `shortestOnAxis` for when the direction matters. A tie, exactly half the
+ * world either way, goes to `delta` itself, the way that does not cross the
+ * seam.
+ */
+const shortestSignedOnAxis = (delta, size) => {
+    const direct = delta < 0 ? -delta : delta, under = delta - size < 0 ? size - delta : delta - size, over = delta + size < 0 ? -delta - size : delta + size;
+    if (direct <= under && direct <= over) {
+        return delta;
+    }
+    return under <= over ? delta - size : delta + size;
+};
+/**
  * A staggered isometric grid, the way Civ2 and Freeciv store one: diamond
  * tiles in rows, every odd row shifted half a tile right, so the world is
  * still a rectangle on screen and still wraps east to west.
@@ -173,6 +186,28 @@ class StaggeredIsoTopology {
     /** `'staggered-iso'`. */
     id() {
         return 'staggered-iso';
+    }
+    /**
+     * The logical (`Δa`, `Δb`), the short way round.
+     *
+     * As in `distance` and `steps`, the way round is picked in (`d`, `y`), where
+     * a wrap moves only one of them: the shortest signed `Δd` and the shortest
+     * signed `Δy`. Then `Δa = (Δd + Δy) / 2` and `Δb = (Δy - Δd) / 2`, exact
+     * because `Δd` and `Δy` have the same parity. `|Δa|` and `|Δb|` are
+     * `(|Δd| + |Δy|) / 2` and `||Δd| - |Δy|| / 2` in some order. `hypot` of
+     * them, the larger of them, and the larger plus half the smaller (rounded
+     * down) all grow with both `|Δd|` and `|Δy|`, so each is smallest for the
+     * shortest `Δd` and `Δy`. The smaller alone does not, and can be smaller
+     * another way round.
+     *
+     * `y` does not wrap unless `wrapsY()`, so across a top or bottom edge that
+     * does not wrap there is only the direct way.
+     */
+    logicalDelta(x1, y1, x2, y2) {
+        const deltaD = shortestSignedOnAxis(2 * (x2 - x1) + (y2 & 1) - (y1 & 1), 2 * this._width), deltaY = this._wrapY
+            ? shortestSignedOnAxis(y2 - y1, this._height)
+            : y2 - y1;
+        return [(deltaD + deltaY) / 2, (deltaY - deltaD) / 2];
     }
     /**
      * Wraps east to west always, and north to south when `wrapsY()`; `null` off

@@ -46,6 +46,40 @@ export interface ITopology<D extends string = string> {
   id(): TopologyId;
 
   /**
+   * The step from (`x1`, `y1`) to (`x2`, `y2`) the short way round any wrap,
+   * in the grid's *logical* square axes: the axes in which the eight
+   * neighbours of a tile are the eight king's moves of a square grid, so a
+   * rule written for the square grid (a distance, a radius, a box) means the
+   * same thing when given these numbers. `null` on a grid that has no such
+   * axes.
+   *
+   * - Signed, measured from the first tile to the second: walking the first
+   *   number along the first axis and the second along the second reaches
+   *   (`x2`, `y2`).
+   * - The short way round: of every way round the wraps, the one that goes
+   *   least far east or west and least far north or south. The straight line
+   *   (`distance`), king's moves (`steps`) and the longer axis plus half the
+   *   shorter are each smallest for it. (Not every measure is: on a staggered
+   *   isometric grid the *shorter* logical gap alone can be smaller another
+   *   way round.)
+   * - When the two tiles are exactly half the world apart east to west, or
+   *   north to south, the way that does not cross the seam.
+   * - Whole numbers, never `-0`, in a new array each call.
+   *
+   * On the square grid the axes are `x` and `y`. On the staggered isometric
+   * grid they are its logical (`a`, `b`): `se` is `+a` and `sw` is `+b`. A
+   * hexagonal grid has six neighbours, not eight, and returns `null`: its
+   * axial coordinates are not a square lattice, and a square-grid rule given
+   * them would measure the wrong thing.
+   */
+  logicalDelta(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): [number, number] | null;
+
+  /**
    * The storage coordinates of the neighbour in `direction`, wrapped into
    * range, or `null` off the edge of an axis that does not wrap.
    */

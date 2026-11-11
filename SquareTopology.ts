@@ -72,6 +72,24 @@ const shortestOnAxis = (delta: number, size: number): number => {
 };
 
 /**
+ * The shortest of `delta`, `delta - size` and `delta + size`, with its sign:
+ * `shortestOnAxis` for when the direction matters. A tie, exactly half the
+ * world either way, goes to `delta` itself, the way that does not cross the
+ * seam.
+ */
+const shortestSignedOnAxis = (delta: number, size: number): number => {
+  const direct = delta < 0 ? -delta : delta,
+    under = delta - size < 0 ? size - delta : delta - size,
+    over = delta + size < 0 ? -delta - size : delta + size;
+
+  if (direct <= under && direct <= over) {
+    return delta;
+  }
+
+  return under <= over ? delta - size : delta + size;
+};
+
+/**
  * The square grid every world has used so far: eight neighbours, four of them
  * sharing an edge, and both axes wrapping, so the world is a torus.
  */
@@ -157,6 +175,22 @@ export class SquareTopology implements ITopology<SquareDirection> {
   /** `'square'`. */
   id(): 'square' {
     return 'square';
+  }
+
+  /**
+   * `x` and `y` are already the logical axes: each the shortest signed gap on
+   * its own axis, as `distance` takes them.
+   */
+  logicalDelta(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): [number, number] {
+    return [
+      shortestSignedOnAxis(x2 - x1, this._width),
+      shortestSignedOnAxis(y2 - y1, this._height),
+    ];
   }
 
   /** Never `null`: both axes wrap. */

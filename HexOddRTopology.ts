@@ -209,6 +209,18 @@ export class HexOddRTopology implements ITopology<HexDirection> {
     return 'hex-odd-r';
   }
 
+  /**
+   * Always `null`. A hex has six neighbours, so there are no axes in which
+   * they are a square grid's eight king's moves. Axial (`Δq`, `Δr`) exist,
+   * but a rule written for the square grid would misread them: the longer
+   * axis plus half the shorter makes axial (`1`, `1`) 1 and (`2`, `-2`) 3,
+   * where both are two hex steps away. `steps` and `distance` already mean
+   * the right thing here.
+   */
+  logicalDelta(x1: number, y1: number, x2: number, y2: number): null {
+    return null;
+  }
+
   /** `null` off the top or bottom when `y` does not wrap. */
   neighbour(
     x: number,
