@@ -159,6 +159,17 @@ class HexOddRTopology {
     id() {
         return 'hex-odd-r';
     }
+    /**
+     * Always `null`. A hex has six neighbours, so there are no axes in which
+     * they are a square grid's eight king's moves. Axial (`Δq`, `Δr`) exist,
+     * but a rule written for the square grid would misread them: the longer
+     * axis plus half the shorter makes axial (`1`, `1`) 1 and (`2`, `-2`) 3,
+     * where both are two hex steps away. `steps` and `distance` already mean
+     * the right thing here.
+     */
+    logicalDelta(x1, y1, x2, y2) {
+        return null;
+    }
     /** `null` off the top or bottom when `y` does not wrap. */
     neighbour(x, y, direction) {
         const [dx, dy] = this.offset(direction, x, y), neighbourY = y + dy;
