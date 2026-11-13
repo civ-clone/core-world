@@ -10,6 +10,7 @@ import {
 import Player from '@civ-clone/core-player/Player';
 import { SquareDirection, SquareEdgeDirection } from './SquareTopology';
 import Terrain from '@civ-clone/core-terrain/Terrain';
+import TerrainChanged from './Rules/TerrainChanged';
 import Tileset from './Tileset';
 import World from './World';
 import Yield from '@civ-clone/core-yield/Yield';
@@ -180,8 +181,20 @@ export class Tile extends DataObject implements ITile {
     return this._terrain;
   }
 
+  /**
+   * Gives the tile `terrain`, then processes `TerrainChanged` with the terrain
+   * it had. Setting the terrain it already has does nothing.
+   */
   setTerrain(terrain: Terrain): void {
+    const from = this._terrain;
+
+    if (terrain === from) {
+      return;
+    }
+
     this._terrain = terrain;
+
+    this._ruleRegistry.process(TerrainChanged, this, from, terrain);
   }
 
   x(): number {

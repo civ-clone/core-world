@@ -4,6 +4,7 @@ exports.Tile = void 0;
 const DataObject_1 = require("@civ-clone/core-data-object/DataObject");
 const Types_1 = require("@civ-clone/core-terrain/Types");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
+const TerrainChanged_1 = require("./Rules/TerrainChanged");
 const Tileset_1 = require("./Tileset");
 const Yield_1 = require("@civ-clone/core-yield/Yield");
 const YieldModifier_1 = require("./Rules/YieldModifier");
@@ -94,8 +95,17 @@ class Tile extends DataObject_1.DataObject {
     terrain() {
         return this._terrain;
     }
+    /**
+     * Gives the tile `terrain`, then processes `TerrainChanged` with the terrain
+     * it had. Setting the terrain it already has does nothing.
+     */
     setTerrain(terrain) {
+        const from = this._terrain;
+        if (terrain === from) {
+            return;
+        }
         this._terrain = terrain;
+        this._ruleRegistry.process(TerrainChanged_1.default, this, from, terrain);
     }
     x() {
         return this._x;

@@ -72,6 +72,10 @@ export declare class Tile extends DataObject implements ITile {
     map(): World;
     score(player?: Player | null, values?: IYieldMap[]): number;
     terrain(): Terrain;
+    /**
+     * Gives the tile `terrain`, then processes `TerrainChanged` with the terrain
+     * it had. Setting the terrain it already has does nothing.
+     */
     setTerrain(terrain: Terrain): void;
     x(): number;
     y(): number;
