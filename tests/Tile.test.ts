@@ -7,6 +7,8 @@ import {
 import Effect from '@civ-clone/core-rule/Effect';
 import Player from '@civ-clone/core-player/Player';
 import RuleRegistry from '@civ-clone/core-rule/RuleRegistry';
+import Terrain from '@civ-clone/core-terrain/Terrain';
+import TerrainChanged from '../Rules/TerrainChanged';
 import Tile from '../Tile';
 import Yield from '@civ-clone/core-yield/Yield';
 import YieldRegistry from '@civ-clone/core-yield/YieldRegistry';
@@ -219,5 +221,58 @@ describe('Tile', (): void => {
     tile.getNeighbours().forEach((tile: Tile): void => {
       expect(tile.isCoast()).to.false;
     });
+  });
+
+  it('should process `TerrainChanged` with the old and new terrain once the tile has the new one', async (): Promise<void> => {
+    const ruleRegistry = new RuleRegistry(),
+      tile = await generateTile(ruleRegistry),
+      from = tile.terrain(),
+      to = new Water(),
+      seen: [Tile, Terrain, Terrain, Terrain][] = [];
+
+    ruleRegistry.register(
+      new TerrainChanged(
+        new Effect((changed: Tile, was: Terrain, now: Terrain): void => {
+          seen.push([changed, was, now, changed.terrain()]);
+        })
+      )
+    );
+
+    tile.setTerrain(to);
+
+    expect(seen.length).to.equal(1);
+    expect(seen[0][0]).to.equal(tile);
+    expect(seen[0][1]).to.equal(from);
+    expect(seen[0][2]).to.equal(to);
+    expect(seen[0][3]).to.equal(to);
+  });
+
+  it('should not process `TerrainChanged` when the terrain is the one it has', async (): Promise<void> => {
+    const ruleRegistry = new RuleRegistry(),
+      tile = await generateTile(ruleRegistry),
+      terrain = tile.terrain();
+    let processed = 0;
+
+    ruleRegistry.register(
+      new TerrainChanged(new Effect((): number => processed++))
+    );
+
+    tile.setTerrain(terrain);
+
+    expect(processed).to.equal(0);
+    expect(tile.terrain()).to.equal(terrain);
+  });
+
+  it("should use the tile's own rule registry for `TerrainChanged`", async (): Promise<void> => {
+    const ruleRegistry = new RuleRegistry(),
+      other = new RuleRegistry(),
+      tile = await generateTile(ruleRegistry);
+    let processed = 0;
+
+    other.register(new TerrainChanged(new Effect((): number => processed++)));
+
+    tile.setTerrain(new Water());
+
+    expect(processed).to.equal(0);
   });
 });
