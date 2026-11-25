@@ -35,6 +35,7 @@ const topologyIdOf = (topology) => {
 };
 class World extends DataObject_1.DataObject {
     constructor(generator, ruleRegistry = RuleRegistry_1.instance, landMassRegistry = LandMassRegistry_1.instance) {
+        var _a, _b;
         super();
         this._tiles = new EntityRegistry_1.default(Tile_1.default);
         /**
@@ -63,6 +64,9 @@ class World extends DataObject_1.DataObject {
          */
         this._topology = null;
         this._generator = generator;
+        // Optional: a generator from a copy of core-world-generator older than
+        //  `id()` says nothing.
+        this._generatorId = (_b = (_a = generator.id) === null || _a === void 0 ? void 0 : _a.call(generator)) !== null && _b !== void 0 ? _b : null;
         this._height = generator.height();
         this._landMassRegistry = landMassRegistry;
         this._width = generator.width();
@@ -109,6 +113,9 @@ class World extends DataObject_1.DataObject {
     }
     forEach(iterator) {
         return this._tiles.forEach(iterator);
+    }
+    generatorId() {
+        return this._generatorId;
     }
     get(x, y) {
         // Falsy rather than `=== null`: `Game.inject` is what puts a transient
@@ -177,13 +184,17 @@ class World extends DataObject_1.DataObject {
      *
      * A world saved before its topology id was recorded arrives without one.
      * Every world was square then, so it is given `'square'` here, and the next
-     * save records it.
+     * save records it. One saved before its generator's id was recorded is given
+     * `null`, as a world from a generator that says nothing is.
      */
     onHydrated() {
         const tiles = this._tiles;
         this._topology = null;
         if (this._topologyId === undefined) {
             this._topologyId = 'square';
+        }
+        if (this._generatorId === undefined) {
+            this._generatorId = null;
         }
         if (!Array.isArray(tiles)) {
             return;

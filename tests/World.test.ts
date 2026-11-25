@@ -131,6 +131,42 @@ describe('World', (): void => {
     );
   });
 
+  it('should record which generator made it, and keep it in a save', (): void => {
+    class Named extends Generator {
+      id(): string | null {
+        return 'named';
+      }
+    }
+
+    const world = new World(new Named(5, 7));
+
+    expect(world.generatorId()).to.equal('named');
+    expect(new World(new Generator(5, 7)).generatorId()).null;
+    expect(world.stateKeys()).to.include('_generatorId');
+    expect(World.transient).not.to.include('_generatorId');
+  });
+
+  it('should record no generator for one from a copy of core-world-generator without ids', (): void => {
+    const generator = new Generator(5, 7) as unknown as { id?: unknown };
+
+    // An older copy's generator has no `id()` at all.
+    generator.id = undefined;
+
+    expect(new World(generator as unknown as Generator).generatorId()).null;
+  });
+
+  it('should load a world saved without a generator id as made by none', async (): Promise<void> => {
+    const world = await generateWorld(generateGenerator(5, 7)),
+      fields = world as unknown as { [key: string]: unknown };
+
+    delete fields._generatorId;
+
+    world.onHydrated();
+
+    expect(world.generatorId()).null;
+    expect(world.stateKeys()).to.include('_generatorId');
+  });
+
   it('should load a world saved without a topology id as square, and save it from then on', async (): Promise<void> => {
     const world = await generateWorld(generateGenerator(5, 7)),
       fields = world as unknown as { [key: string]: unknown };
