@@ -24,6 +24,7 @@ export interface IWorld extends IDataObject {
   build(): Promise<World>;
   filter(iterator: IRegistryIterator<Tile>): Tile[];
   forEach(iterator: (item: Tile, i: number) => void): void;
+  generatorId(): string | null;
   get(x: number, y: number): Tile;
   height(): number;
   includes(tile: Tile): boolean;
@@ -77,6 +78,14 @@ export class World extends DataObject implements IWorld {
     '_topology',
   ];
   private _generator: Generator;
+  /**
+   * Which generator made the world (`Generator#id()`), or `null` for one that
+   * doesn't say: saved, unlike `_generator`, so that a rule that plays
+   * differently on a particular map (the Earth) can still tell after a load. A
+   * world saved before this was recorded has none, and `onHydrated` makes it
+   * `null`.
+   */
+  private _generatorId: string | null;
   private _height: number;
   private _landMassRegistry: LandMassRegistry;
   private _ruleRegistry: RuleRegistry;
@@ -123,6 +132,9 @@ export class World extends DataObject implements IWorld {
     super();
 
     this._generator = generator;
+    // Optional: a generator from a copy of core-world-generator older than
+    //  `id()` says nothing.
+    this._generatorId = generator.id?.() ?? null;
     this._height = generator.height();
     this._landMassRegistry = landMassRegistry;
     this._width = generator.width();
@@ -194,6 +206,10 @@ export class World extends DataObject implements IWorld {
 
   forEach(iterator: (item: Tile, i: number) => void): void {
     return this._tiles.forEach(iterator);
+  }
+
+  generatorId(): string | null {
+    return this._generatorId;
   }
 
   get(x: number, y: number): Tile {
@@ -279,7 +295,8 @@ export class World extends DataObject implements IWorld {
    *
    * A world saved before its topology id was recorded arrives without one.
    * Every world was square then, so it is given `'square'` here, and the next
-   * save records it.
+   * save records it. One saved before its generator's id was recorded is given
+   * `null`, as a world from a generator that says nothing is.
    */
   onHydrated(): void {
     const tiles = this._tiles as unknown;
@@ -288,6 +305,10 @@ export class World extends DataObject implements IWorld {
 
     if (this._topologyId === undefined) {
       this._topologyId = 'square';
+    }
+
+    if (this._generatorId === undefined) {
+      this._generatorId = null;
     }
 
     if (!Array.isArray(tiles)) {

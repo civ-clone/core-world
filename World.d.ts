@@ -10,6 +10,7 @@ export interface IWorld extends IDataObject {
     build(): Promise<World>;
     filter(iterator: IRegistryIterator<Tile>): Tile[];
     forEach(iterator: (item: Tile, i: number) => void): void;
+    generatorId(): string | null;
     get(x: number, y: number): Tile;
     height(): number;
     includes(tile: Tile): boolean;
@@ -24,6 +25,14 @@ export interface IWorld extends IDataObject {
 export declare class World extends DataObject implements IWorld {
     static readonly transient: string[];
     private _generator;
+    /**
+     * Which generator made the world (`Generator#id()`), or `null` for one that
+     * doesn't say: saved, unlike `_generator`, so that a rule that plays
+     * differently on a particular map (the Earth) can still tell after a load. A
+     * world saved before this was recorded has none, and `onHydrated` makes it
+     * `null`.
+     */
+    private _generatorId;
     private _height;
     private _landMassRegistry;
     private _ruleRegistry;
@@ -66,6 +75,7 @@ export declare class World extends DataObject implements IWorld {
     entries(): Tile[];
     filter(iterator: IRegistryIterator<Tile>): Tile[];
     forEach(iterator: (item: Tile, i: number) => void): void;
+    generatorId(): string | null;
     get(x: number, y: number): Tile;
     height(): number;
     includes(tile: Tile): boolean;
@@ -97,7 +107,8 @@ export declare class World extends DataObject implements IWorld {
      *
      * A world saved before its topology id was recorded arrives without one.
      * Every world was square then, so it is given `'square'` here, and the next
-     * save records it.
+     * save records it. One saved before its generator's id was recorded is given
+     * `null`, as a world from a generator that says nothing is.
      */
     onHydrated(): void;
 }
